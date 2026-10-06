@@ -1,0 +1,1838 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="KEYSTONE">
+<title>KEYSTONE — 宅建士</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23171b27%22/%3E%3Cpath d=%22M30 75V45l20-18 20 18v30H58V58H42v17z%22 fill=%22%236d87c4%22/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@200;300;400;500;600&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fafafb; --surface:#ffffff; --surface2:#f2f3f6; --border:#e3e5ec; --border-soft:#eff0f4;
+  --text:#171b27; --text-dim:#596075; --text-muted:#9ba1b1;
+  --hdr-bg:#171b27; --hdr-text:#eef0f6; --hdr-dim:#80879a;
+  /* Accent — 藍（宅建） */
+  --accent:#34508f; --accent-soft:#6d87c4; --accent-bg:#eef2fa;
+  --green:#2f9e63; --green-bg:#eef8f1; --red:#cf4d47; --red-bg:#fbf2f1;
+  --blue:#3d78b0; --blue-bg:#eef4fa; --amber:#c08a1e; --amber-bg:#fdf6e8;
+  /* 分野色 */
+  --f-kenri:#7a4fa0; --f-kenri-bg:#f4effa;
+  --f-gyoho:#34508f; --f-gyoho-bg:#eef2fa;
+  --f-horei:#2f8a6e; --f-horei-bg:#edf7f3;
+  --f-zei:#b5741c;   --f-zei-bg:#fcf4e8;
+  --r:7px;
+}
+body{ background:var(--bg); color:var(--text); font-family:'Noto Sans JP','DM Sans',system-ui,sans-serif; font-size:14px; line-height:1.75; height:100dvh; display:flex; flex-direction:column; overflow:hidden; }
+button{ font-family:inherit; }
+
+/* ══════════ HEADER ══════════ */
+#hdr{ flex-shrink:0; background:var(--hdr-bg); padding-top:env(safe-area-inset-top); }
+.hdr-main{ display:flex; align-items:center; justify-content:space-between; padding:16px 0 16px 24px; gap:12px; }
+.hdr-title-block{ display:flex; flex-direction:column; gap:7px; min-width:0; cursor:pointer; }
+.hdr-title{ font-family:'DM Sans',sans-serif; font-weight:200; font-size:24px; letter-spacing:.42em; color:var(--hdr-text); text-indent:.42em; line-height:1; }
+.hdr-sub-inline{ font-family:'DM Sans',sans-serif; font-weight:300; font-size:10px; letter-spacing:.28em; color:var(--hdr-text); text-indent:.28em; line-height:1; opacity:.62; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.hdr-actions{ display:flex; align-items:center; gap:8px; flex-shrink:0; padding-right:16px; }
+.hdr-icon-btn{ background:none; border:1px solid rgba(238,240,246,.22); color:rgba(238,240,246,.75); height:32px; padding:0 12px; border-radius:5px; cursor:pointer; font-size:11px; display:flex; align-items:center; gap:5px; transition:all .15s; -webkit-tap-highlight-color:transparent; }
+.hdr-icon-btn:hover{ background:rgba(238,240,246,.08); color:var(--hdr-text); }
+@media (max-width:640px){ .hdr-icon-btn .t{ display:none; } .hdr-main{ padding-left:16px; } .hdr-title{ font-size:20px; } }
+
+/* ══════════ LAYOUT ══════════ */
+#app{ flex:1; display:flex; overflow:hidden; position:relative; }
+#sb{ width:300px; flex-shrink:0; background:var(--surface); border-right:1px solid var(--border); display:flex; flex-direction:column; overflow:hidden; }
+.sb-scroll{ flex:1; overflow-y:auto; padding:6px 0 24px; }
+.sb-nav{ padding:12px 12px 10px; border-bottom:1px solid var(--border); display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+.navbtn{ display:flex; align-items:center; gap:7px; padding:8px 10px; border:1px solid var(--border); border-radius:var(--r); background:var(--surface2); color:var(--text-dim); font-size:12px; cursor:pointer; text-align:left; -webkit-tap-highlight-color:transparent; transition:all .12s; }
+.navbtn:hover{ border-color:var(--accent-soft); color:var(--accent); }
+.navbtn.on{ background:var(--accent); border-color:var(--accent); color:#fff; }
+.grp-lbl{ padding:14px 20px 4px; font-size:10px; font-weight:700; letter-spacing:.12em; display:flex; align-items:center; gap:6px; }
+.grp-lbl .gn{ margin-left:auto; color:var(--text-muted); font-weight:500; letter-spacing:.02em; }
+.ubtn{ display:flex; align-items:center; width:100%; padding:6px 20px; gap:9px; background:none; border:none; cursor:pointer; color:var(--text-dim); font-size:12.5px; text-align:left; transition:background .1s; -webkit-tap-highlight-color:transparent; border-left:3px solid transparent; }
+.ubtn:hover{ background:var(--surface2); color:var(--text); }
+.ubtn.active{ background:var(--accent-bg); color:var(--accent); border-left-color:var(--accent); font-weight:500; }
+.ubtn .uicon{ font-size:15px; width:20px; text-align:center; flex-shrink:0; }
+.ubtn .utxt{ flex:1; min-width:0; display:flex; flex-direction:column; line-height:1.3; }
+.ubtn .ut-main{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ubtn .ut-sub{ font-size:10px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.umeter{ width:34px; flex-shrink:0; font-size:10px; color:var(--text-muted); text-align:right; font-family:'DM Sans',sans-serif; }
+.umeter.good{ color:var(--green); font-weight:600; }
+
+#main{ flex:1; display:flex; flex-direction:column; overflow:hidden; background:var(--bg); min-width:0; }
+#crumb{ display:none; flex-shrink:0; align-items:center; gap:10px; padding:10px 16px; background:var(--surface); border-bottom:1px solid var(--border); }
+#crumb .back{ color:var(--accent); font-size:13px; cursor:pointer; background:none; border:none; padding:4px 0; }
+#crumb .ct{ font-size:13px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#content{ flex:1; overflow-y:auto; padding:34px 48px 96px; -webkit-overflow-scrolling:touch; }
+@media (max-width:640px){
+  #sb{ width:100%; position:absolute; inset:0; z-index:10; border-right:none; }
+  body.in-content #sb{ display:none; }
+  body:not(.in-content) #main{ display:none; }
+  #crumb{ display:flex; }
+  #content{ padding:20px 16px 96px; }
+}
+
+/* ══════════ 共通部品 ══════════ */
+h2.pg{ font-size:19px; font-weight:600; margin-bottom:6px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.pg-sub{ color:var(--text-muted); font-size:12.5px; margin-bottom:22px; }
+.sec-h{ font-size:11px; font-weight:700; color:var(--accent); margin:28px 0 12px; letter-spacing:.1em; display:flex; align-items:center; gap:8px; }
+.sec-h::before{ content:""; width:16px; height:2px; background:var(--accent); border-radius:2px; }
+.wrap{ max-width:760px; }
+.btn{ display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border-radius:var(--r); border:1px solid var(--border); background:var(--surface); color:var(--text-dim); font-size:12.5px; cursor:pointer; transition:all .15s; white-space:nowrap; -webkit-tap-highlight-color:transparent; }
+.btn:hover{ border-color:var(--accent); color:var(--accent); }
+.btn:disabled{ opacity:.4; cursor:default; }
+.btn.p{ background:var(--hdr-bg); border-color:var(--hdr-bg); color:var(--hdr-text); font-weight:500; }
+.btn.p:hover{ background:var(--accent); border-color:var(--accent); color:#fff; }
+.btn.sm{ padding:6px 12px; font-size:11.5px; }
+.btn.danger:hover{ border-color:var(--red); color:var(--red); }
+.row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+.chip{ display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:700; padding:2px 8px; border-radius:4px; letter-spacing:.03em; white-space:nowrap; }
+.chip.kenri{ background:var(--f-kenri-bg); color:var(--f-kenri); }
+.chip.gyoho{ background:var(--f-gyoho-bg); color:var(--f-gyoho); }
+.chip.horei{ background:var(--f-horei-bg); color:var(--f-horei); }
+.chip.zei{ background:var(--f-zei-bg); color:var(--f-zei); }
+.chip.gray{ background:var(--surface2); color:var(--text-muted); }
+.chip.imp{ background:var(--amber-bg); color:#8a6510; }
+.empty{ background:var(--surface); border:1px dashed var(--border); border-radius:var(--r); padding:22px; color:var(--text-muted); font-size:13px; text-align:center; line-height:1.9; }
+.seg{ display:inline-flex; border:1px solid var(--border); border-radius:var(--r); overflow:hidden; background:var(--surface); }
+.seg button{ border:none; background:none; padding:7px 13px; font-size:12px; color:var(--text-dim); cursor:pointer; border-right:1px solid var(--border); }
+.seg button:last-child{ border-right:none; }
+.seg button.on{ background:var(--accent); color:#fff; }
+
+/* ══════════ HOME ══════════ */
+.hero{ background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:20px 22px; margin-bottom:22px; display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+@media (max-width:640px){ .hero{ grid-template-columns:repeat(2,1fr); } }
+.kpi .k-l{ font-size:10.5px; color:var(--text-muted); letter-spacing:.04em; }
+.kpi .k-v{ font-family:'DM Sans',sans-serif; font-size:26px; font-weight:300; color:var(--text); line-height:1.25; }
+.kpi .k-v small{ font-size:12px; color:var(--text-muted); margin-left:2px; }
+.mode-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; }
+.mode-card{ text-align:left; background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:16px 18px; cursor:pointer; transition:all .15s; -webkit-tap-highlight-color:transparent; }
+.mode-card:hover:not(:disabled){ border-color:var(--accent); box-shadow:0 3px 12px rgba(52,80,143,.08); transform:translateY(-1px); }
+.mode-card:disabled{ opacity:.5; cursor:default; }
+.mode-ic{ font-size:22px; }
+.mode-name{ font-size:14.5px; font-weight:600; color:var(--text); margin:6px 0 3px; }
+.mode-desc{ font-size:11.5px; color:var(--text-muted); line-height:1.6; }
+.fbars{ background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:16px 18px; }
+.fbar{ display:grid; grid-template-columns:110px 1fr 74px; gap:10px; align-items:center; margin:6px 0; font-size:12.5px; }
+.fbar .tr{ height:9px; background:var(--surface2); border-radius:5px; overflow:hidden; }
+.fbar .fl{ height:100%; border-radius:5px; }
+.fbar .v{ text-align:right; font-family:'DM Sans',sans-serif; color:var(--text-dim); font-size:12px; }
+
+/* ══════════ 解説 ══════════ */
+.tabs{ display:flex; gap:0; border-bottom:1px solid var(--border); margin:4px 0 24px; overflow-x:auto; }
+.tab{ padding:11px 18px; font-size:13px; color:var(--text-muted); cursor:pointer; border:none; background:none; border-bottom:2px solid transparent; white-space:nowrap; -webkit-tap-highlight-color:transparent; }
+.tab.on{ color:var(--accent); border-bottom-color:var(--accent); font-weight:500; }
+.gram{ max-width:780px; }
+.gram h3{ font-size:12px; font-weight:700; color:var(--accent); margin:30px 0 14px; letter-spacing:.1em; display:flex; align-items:center; gap:8px; }
+.gram h3::before{ content:""; width:16px; height:2px; background:var(--accent); border-radius:2px; }
+.gram h3:first-child{ margin-top:0; }
+.gram p{ color:var(--text-dim); margin-bottom:12px; font-size:14px; line-height:1.9; }
+.gram strong{ color:var(--text); }
+.gram ul,.gram ol{ margin:0 0 14px; padding-left:20px; }
+.gram li{ color:var(--text-dim); margin-bottom:6px; line-height:1.85; }
+.gram table{ width:100%; border-collapse:collapse; margin:12px 0 20px; font-size:13px; background:var(--surface); border:1px solid var(--border); }
+.gram th{ text-align:left; padding:9px 12px; background:var(--surface2); color:var(--text-dim); font-size:11px; font-weight:600; border-bottom:1px solid var(--border); }
+.gram td{ padding:9px 12px; border-bottom:1px solid var(--border-soft); color:var(--text); vertical-align:top; }
+.gram td:first-child{ color:var(--accent); font-weight:500; }
+.tblwrap{ overflow-x:auto; }
+.hbox{ background:var(--accent-bg); border-left:3px solid var(--accent); padding:13px 17px; border-radius:0 var(--r) var(--r) 0; margin:12px 0 20px; font-size:13.5px; line-height:1.95; color:var(--text); }
+.term{ color:var(--accent); font-weight:600; }
+.wbox{ background:var(--amber-bg); border:1px solid #f0e2c0; border-radius:var(--r); padding:12px 16px; margin:12px 0; font-size:12.5px; color:#8a6510; line-height:1.85; }
+.nbox{ background:var(--blue-bg); border:1px solid #d6e4f0; border-radius:var(--r); padding:12px 16px; margin:12px 0; font-size:12.5px; color:var(--blue); line-height:1.85; }
+.diagram{ background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:14px 16px; margin:12px 0 20px; font-family:ui-monospace,Menlo,'Noto Sans JP',monospace; font-size:12px; line-height:1.6; white-space:pre; overflow-x:auto; color:var(--text-dim); }
+
+/* ══════════ 問題 ══════════ */
+.qprog{ display:flex; align-items:center; gap:14px; margin-bottom:20px; max-width:760px; }
+.qtrack{ flex:1; height:4px; background:var(--surface2); border-radius:2px; overflow:hidden; }
+.qfill{ height:100%; background:var(--accent); transition:width .3s; }
+.qlbl{ font-size:11px; color:var(--text-muted); white-space:nowrap; font-family:'DM Sans',sans-serif; }
+.qcard{ background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:22px 24px; margin-bottom:14px; max-width:760px; }
+@media (max-width:640px){ .qcard{ padding:18px 16px; } }
+.qmeta{ display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
+.qmeta .src{ font-size:11px; color:var(--text-muted); font-family:'DM Sans','Noto Sans JP',sans-serif; }
+.qq{ font-size:15px; font-weight:500; color:var(--text); line-height:1.85; margin-bottom:16px; }
+.stmts{ background:var(--surface2); border-radius:var(--r); padding:12px 16px; margin-bottom:16px; }
+.stmt{ display:flex; gap:10px; font-size:14px; line-height:1.8; margin:6px 0; }
+.stmt .sl{ font-weight:700; color:var(--accent); flex-shrink:0; }
+.stmt .sj{ flex-shrink:0; font-weight:700; width:22px; text-align:center; }
+.stmt .sj.o{ color:var(--green); } .stmt .sj.x{ color:var(--red); }
+.choices{ display:flex; flex-direction:column; gap:9px; }
+.choice{ text-align:left; padding:12px 15px; border:1px solid var(--border); border-radius:var(--r); background:var(--surface); color:var(--text); font-size:14px; cursor:pointer; transition:all .12s; display:flex; align-items:flex-start; gap:11px; -webkit-tap-highlight-color:transparent; line-height:1.75; }
+.choice:hover:not(:disabled){ border-color:var(--accent-soft); background:var(--accent-bg); }
+.choice:disabled{ cursor:default; }
+.choice .ck{ width:24px; height:24px; border-radius:50%; border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:var(--text-muted); flex-shrink:0; font-family:'DM Sans',sans-serif; margin-top:1px; }
+.choice.ok{ border-color:var(--green); background:var(--green-bg); } .choice.ok .ck{ background:var(--green); border-color:var(--green); color:#fff; }
+.choice.ng{ border-color:var(--red); background:var(--red-bg); } .choice.ng .ck{ background:var(--red); border-color:var(--red); color:#fff; }
+.choice.sel{ border-color:var(--accent); background:var(--accent-bg); } .choice.sel .ck{ background:var(--accent); border-color:var(--accent); color:#fff; }
+.cwhy{ display:none; font-size:12.5px; color:var(--text-dim); margin:-3px 0 4px 36px; line-height:1.8; padding:2px 0 4px 12px; border-left:2px solid var(--border); }
+.cwhy.show{ display:block; }
+.cwhy b.o{ color:var(--green); } .cwhy b.x{ color:var(--red); }
+.fb{ border-radius:var(--r); padding:14px 18px; margin-top:14px; font-size:13.5px; line-height:1.85; max-width:760px; animation:fadein .2s ease; }
+.fb.ok{ background:var(--green-bg); border:1px solid rgba(47,158,99,.3); }
+.fb.ng{ background:var(--red-bg); border:1px solid rgba(207,77,71,.3); }
+.fb .fb-h{ font-weight:700; margin-bottom:5px; }
+.fb.ok .fb-h{ color:var(--green); } .fb.ng .fb-h{ color:var(--red); }
+.fb .fb-body{ color:var(--text-dim); }
+@keyframes fadein{ from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:none} }
+.qnav{ display:flex; gap:10px; margin-top:16px; max-width:760px; align-items:center; flex-wrap:wrap; }
+.qnav .spacer{ flex:1; }
+.keepbtn{ border:1px solid var(--border); background:var(--surface); border-radius:var(--r); padding:7px 12px; font-size:12px; cursor:pointer; color:var(--text-dim); }
+.keepbtn.on{ border-color:var(--amber); color:#8a6510; background:var(--amber-bg); }
+
+/* ○× */
+.ox-card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:22px 24px; max-width:760px; }
+.ox-t{ font-size:15.5px; line-height:1.9; font-weight:500; margin-bottom:18px; }
+.ox-btns{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.ox-b{ padding:16px; font-size:24px; font-weight:700; border:1px solid var(--border); border-radius:10px; background:var(--surface); cursor:pointer; -webkit-tap-highlight-color:transparent; transition:all .12s; }
+.ox-b.o{ color:var(--green); } .ox-b.x{ color:var(--red); }
+.ox-b:hover:not(:disabled){ background:var(--surface2); }
+.ox-b.hit{ outline:3px solid currentColor; }
+
+/* ══════════ 本試験モード ══════════ */
+.exbar{ position:sticky; top:-34px; z-index:3; background:var(--bg); display:flex; align-items:center; gap:10px; padding:8px 0 12px; margin-top:-8px; flex-wrap:wrap; max-width:760px; }
+@media (max-width:640px){ .exbar{ top:-20px; } }
+.timer{ font-family:'DM Sans',ui-monospace,monospace; font-size:16px; font-weight:500; padding:5px 12px; border-radius:6px; background:var(--surface); color:var(--text); border:1px solid var(--border); letter-spacing:.05em; }
+.timer.warn{ background:var(--red-bg); color:var(--red); border-color:var(--red); }
+.grid50{ display:grid; grid-template-columns:repeat(10,1fr); gap:5px; max-width:760px; margin:6px 0 16px; }
+.gcell{ aspect-ratio:1.4; border:1px solid var(--border); border-radius:5px; background:var(--surface); font-size:11px; font-family:'DM Sans',sans-serif; color:var(--text-muted); cursor:pointer; display:flex; align-items:center; justify-content:center; position:relative; padding:0; }
+.gcell.ans{ background:var(--accent-bg); color:var(--accent); border-color:var(--accent-soft); font-weight:600; }
+.gcell.cur{ outline:2px solid var(--accent); }
+.gcell.flag::after{ content:""; position:absolute; top:2px; right:2px; width:6px; height:6px; border-radius:50%; background:var(--amber); }
+.gcell.ok{ background:var(--green-bg); color:var(--green); border-color:rgba(47,158,99,.5); }
+.gcell.ng{ background:var(--red-bg); color:var(--red); border-color:rgba(207,77,71,.5); }
+.gcell.na{ background:var(--surface2); color:var(--text-muted); border-style:dashed; }
+.result-badge{ text-align:center; padding:24px 20px; border-radius:var(--r); margin-bottom:18px; max-width:760px; }
+.result-badge.pass{ background:var(--green-bg); border:1px solid rgba(47,158,99,.4); }
+.result-badge.fail{ background:var(--red-bg); border:1px solid rgba(207,77,71,.4); }
+.rb-big{ font-size:34px; font-weight:700; font-family:'DM Sans','Noto Sans JP',sans-serif; }
+.pass .rb-big{ color:var(--green); } .fail .rb-big{ color:var(--red); }
+.rb-sub{ font-size:13px; color:var(--text-dim); margin-top:6px; }
+
+/* ══════════ 一覧 ══════════ */
+.list-item{ display:flex; gap:12px; align-items:center; width:100%; text-align:left; background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:12px 16px; margin-bottom:9px; }
+.list-item .li-main{ flex:1; min-width:0; }
+.list-item .li-t{ font-weight:600; font-size:14px; }
+.list-item .li-s{ font-size:12px; color:var(--text-muted); margin-top:2px; }
+.rev-item{ background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--border); border-radius:var(--r); padding:12px 15px; margin-bottom:9px; font-size:13px; max-width:760px; cursor:pointer; }
+.rev-item.ok{ border-left-color:var(--green); } .rev-item.no{ border-left-color:var(--red); }
+.rev-item .rq{ color:var(--text); margin:4px 0 2px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.rev-item .rl{ color:var(--text-dim); font-size:12px; }
+.rev-item .rl .yes{ color:var(--green); font-weight:600; } .rev-item .rl .bad{ color:var(--red); font-weight:600; }
+table.hist{ width:100%; border-collapse:collapse; font-size:12.5px; background:var(--surface); border:1px solid var(--border); max-width:760px; }
+table.hist th{ text-align:left; padding:8px 10px; background:var(--surface2); color:var(--text-dim); font-size:11px; }
+table.hist td{ padding:8px 10px; border-top:1px solid var(--border-soft); }
+
+/* ══════════ 取り込み ══════════ */
+textarea.imp{ width:100%; min-height:200px; border:1px solid var(--border); border-radius:var(--r); padding:12px 14px; font-family:ui-monospace,Menlo,monospace; font-size:12px; line-height:1.6; background:var(--surface); color:var(--text); resize:vertical; outline:none; }
+textarea.imp:focus{ border-color:var(--accent); }
+.imp-msg{ font-size:12.5px; margin-top:10px; white-space:pre-wrap; line-height:1.7; }
+.imp-msg.err{ color:var(--red); } .imp-msg.ok{ color:var(--green); }
+input[type=number].num{ width:70px; padding:6px 8px; border:1px solid var(--border); border-radius:6px; font-size:13px; }
+label.ck{ display:inline-flex; align-items:center; gap:6px; font-size:13px; cursor:pointer; }
+
+/* ══════════ MODAL / TOAST ══════════ */
+#modal{ position:fixed; inset:0; background:rgba(15,18,28,.55); display:none; align-items:center; justify-content:center; z-index:200; padding:16px; }
+#modal.show{ display:flex; animation:fadein .15s ease; }
+.modal-box{ background:var(--surface); border-radius:14px; max-width:760px; width:100%; max-height:88vh; display:flex; flex-direction:column; box-shadow:0 24px 70px rgba(0,0,0,.32); overflow:hidden; }
+.modal-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:13px 18px; border-bottom:1px solid var(--border); }
+.modal-title{ font-size:14px; font-weight:600; color:var(--accent); }
+.modal-close{ width:30px; height:30px; border-radius:50%; border:1px solid var(--border); background:var(--surface); color:var(--text-dim); font-size:15px; cursor:pointer; }
+.modal-body{ padding:18px 20px 22px; overflow-y:auto; }
+.modal-body .qcard{ border:none; padding:0; margin:0; }
+#toast{ position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--hdr-bg); color:var(--hdr-text); padding:11px 20px; border-radius:8px; font-size:13px; opacity:0; pointer-events:none; transition:all .25s; z-index:300; box-shadow:0 6px 24px rgba(0,0,0,.18); max-width:90vw; }
+#toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+#toast.err{ background:var(--red); }
+::-webkit-scrollbar{ width:8px; height:8px; } ::-webkit-scrollbar-thumb{ background:#d5d8e1; border-radius:4px; }
+</style>
+</head>
+<body>
+
+<div id="hdr">
+  <div class="hdr-main">
+    <div class="hdr-title-block" onclick="go('home')">
+      <div class="hdr-title">KEYSTONE</div>
+      <div class="hdr-sub-inline">TAKKEN · 宅地建物取引士</div>
+    </div>
+    <div class="hdr-actions">
+      <button class="hdr-icon-btn" onclick="go('import')" title="問題の取り込み">📥<span class="t">取り込み</span></button>
+      <button class="hdr-icon-btn" onclick="go('settings')" title="設定・バックアップ">⚙︎<span class="t">設定</span></button>
+    </div>
+  </div>
+</div>
+
+<div id="app">
+  <aside id="sb">
+    <div class="sb-nav" id="sb-nav"></div>
+    <div class="sb-scroll" id="sb-list"></div>
+  </aside>
+  <main id="main">
+    <div id="crumb"><button class="back" onclick="mobileBack()">‹ メニュー</button><span class="ct" id="crumb-t"></span></div>
+    <div id="content"></div>
+  </main>
+</div>
+
+<div id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box" role="dialog" aria-modal="true">
+    <div class="modal-head"><div class="modal-title" id="modal-title">—</div><button class="modal-close" onclick="closeModal()" aria-label="閉じる">✕</button></div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<!-- ═══ 学習コンテンツ（オリジナル）：UNITS（単元・解説）と ORIG_Q（問題）。中身を増やすときはこの2ブロックだけ触ればよい ═══ -->
+<script>
+/* ═══════════════════════════════════════════════════════════
+   KEYSTONE 宅建 — 単元と解説（オリジナル）
+   id：英数字（questions.js の unit と対応）
+   field：kenri / gyoho / horei / zei
+   menjo：true なら免除科目（問46〜50）
+   gram：解説HTML（h3 / p / table / .hbox / .wbox / .nbox / .diagram が使える）
+   ⚠️ 法改正：試験はその年の4月1日時点の法令で出題。毎年4月に見直すこと
+   ═══════════════════════════════════════════════════════════ */
+window.UNITS = [
+
+/* ───────────── 権利関係 ───────────── */
+{ id:'ishi', field:'kenri', icon:'💬', title:'意思表示', sub:'心裡留保・虚偽表示・錯誤・詐欺・強迫', gram:`
+<h3>まず、この単元は何？</h3>
+<p>「本心と違う意思表示」や「だまされた・脅された意思表示」が<strong>有効か・無効か・取り消せるか</strong>、そして<strong>第三者に主張できるか</strong>を整理する単元です。毎年のように出ます。</p>
+<h3>5つの比較表（これだけ覚える）</h3>
+<div class="tblwrap"><table><thead><tr><th>種類</th><th>当事者間の効果</th><th>第三者に対抗できない相手</th></tr></thead><tbody>
+<tr><td>心裡留保（冗談）</td><td>原則<strong>有効</strong>。相手が悪意・有過失なら無効</td><td>善意の第三者</td></tr>
+<tr><td>虚偽表示（通謀）</td><td><strong>無効</strong></td><td>善意の第三者（過失は問わない）</td></tr>
+<tr><td>錯誤（勘違い）</td><td><strong>取り消せる</strong>（重要な錯誤）</td><td>善意・無過失の第三者</td></tr>
+<tr><td>詐欺（だまされた）</td><td><strong>取り消せる</strong></td><td>善意・無過失の第三者</td></tr>
+<tr><td>強迫（脅された）</td><td><strong>取り消せる</strong></td><td>なし（<strong>誰にでも対抗できる</strong>）</td></tr>
+</tbody></table></div>
+<div class="hbox"><span class="term">覚え方</span>「強迫された人は一番かわいそう」→ 第三者が善意でも取り戻せる。<br>「虚偽表示は自分もウソに加担した」→ 善意の第三者には過失があっても負ける。</div>
+<h3>錯誤のポイント</h3>
+<ul><li>取り消せるのは、法律行為の目的と取引上の社会通念に照らして<strong>重要な</strong>錯誤</li>
+<li>動機の錯誤（基礎事情の錯誤）は、その事情が<strong>法律行為の基礎とされていることが表示</strong>されていたときに限り取り消せる</li>
+<li>表意者に<strong>重大な過失</strong>があると原則取り消せない（相手方が悪意・重過失のとき、相手方も同じ錯誤のときは取り消せる）</li></ul>
+<h3>第三者による詐欺・強迫</h3>
+<p>契約の相手方ではなく<strong>第三者</strong>がだました場合、相手方が<strong>悪意または有過失</strong>のときに限り取り消せます。第三者が<strong>強迫</strong>した場合は、相手方が善意無過失でも取り消せます。</p>
+<div class="wbox">⚠️ 2020年施行の改正民法で、錯誤は「無効」→「取消し」に変わりました。古い問題集の解説には注意。</div>
+`},
+
+{ id:'seigen', field:'kenri', icon:'🧒', title:'制限行為能力者', sub:'未成年者・成年被後見人・被保佐人・被補助人', gram:`
+<h3>4つの類型</h3>
+<div class="tblwrap"><table><thead><tr><th>類型</th><th>保護者</th><th>単独でした行為</th></tr></thead><tbody>
+<tr><td>未成年者（18歳未満）</td><td>親権者・未成年後見人</td><td>同意のない行為は取り消せる。ただし<strong>単に権利を得・義務を免れる行為</strong>、処分を許された財産、営業を許された営業は単独で可</td></tr>
+<tr><td>成年被後見人</td><td>成年後見人</td><td><strong>日用品の購入その他日常生活に関する行為以外</strong>は取り消せる。後見人の<strong>同意を得てした行為でも取り消せる</strong></td></tr>
+<tr><td>被保佐人</td><td>保佐人</td><td>不動産の売買・借財・保証など<strong>重要な行為</strong>は保佐人の同意が必要（ないと取り消せる）</td></tr>
+<tr><td>被補助人</td><td>補助人</td><td>家庭裁判所が定めた<strong>特定の行為</strong>だけ同意が必要</td></tr>
+</tbody></table></div>
+<h3>よく出るポイント</h3>
+<ul><li>成年後見人が本人の<strong>居住用</strong>の建物・敷地を売却・賃貸・抵当権設定するには<strong>家庭裁判所の許可</strong>が必要</li>
+<li>制限行為能力者が<strong>詐術</strong>を用いて行為能力者と信じさせたときは、取り消せない</li>
+<li>取消しは、<strong>善意の第三者にも対抗できる</strong>（制限行為能力者の保護が優先）</li>
+<li>相手方は1か月以上の期間を定めて追認するかどうか<strong>催告</strong>できる</li></ul>
+<div class="hbox"><span class="term">ひっかけ</span>「成年被後見人が成年後見人の同意を得て土地を売却した → 取り消せない」は<strong>×</strong>。成年被後見人は同意どおりに行動できるとは限らないため、同意があっても取り消せます。</div>
+`},
+
+{ id:'dairi', field:'kenri', icon:'🤝', title:'代理', sub:'顕名・無権代理・表見代理・自己契約', gram:`
+<h3>代理の基本</h3>
+<p>代理人が<strong>本人のためにすることを示して</strong>（顕名）意思表示をすると、効果は直接本人に帰属します。顕名がないと原則として代理人自身の契約になります（相手方が本人のためと知り、または知ることができたときは本人に帰属）。</p>
+<ul><li>代理人は<strong>行為能力者である必要はない</strong>。制限行為能力者が代理人としてした行為は、行為能力の制限を理由に取り消せない</li>
+<li>代理人が本人の許諾なく<strong>自己契約・双方代理</strong>をすると、<strong>無権代理とみなされる</strong>（債務の履行や本人があらかじめ許諾した行為を除く）</li>
+<li>任意代理人が<strong>復代理人</strong>を選べるのは、本人の許諾があるときか、やむを得ない事由があるとき</li></ul>
+<h3>無権代理 ── 相手方が使える4つの手段</h3>
+<div class="tblwrap"><table><thead><tr><th>手段</th><th>使える相手方</th></tr></thead><tbody>
+<tr><td>催告権</td><td>悪意でも可。本人が期間内に確答しなければ<strong>追認拒絶</strong>とみなす</td></tr>
+<tr><td>取消権</td><td><strong>善意</strong>の相手方（本人が追認する前まで）</td></tr>
+<tr><td>無権代理人の責任追及</td><td>原則<strong>善意・無過失</strong>（無権代理人が自分に代理権がないと知っていたときは善意・有過失でも可）</td></tr>
+<tr><td>表見代理</td><td>善意・無過失（代理権があると信じる正当な理由）</td></tr>
+</tbody></table></div>
+<div class="hbox"><span class="term">追認</span>本人が追認すると、別段の意思表示がない限り<strong>契約の時にさかのぼって</strong>有効になります。</div>
+<h3>無権代理と相続</h3>
+<ul><li>無権代理人が本人を<strong>単独相続</strong> → 追認拒絶できず、契約は当然に有効</li>
+<li>本人が無権代理人を相続 → 本人は追認を<strong>拒絶できる</strong>（ただし無権代理人の責任は承継する）</li></ul>
+`},
+
+{ id:'jiko', field:'kenri', icon:'⏳', title:'時効', sub:'取得時効・消滅時効・完成猶予と更新', gram:`
+<h3>取得時効</h3>
+<div class="tblwrap"><table><thead><tr><th>占有開始時</th><th>期間</th></tr></thead><tbody>
+<tr><td>善意・無過失</td><td><strong>10年</strong></td></tr>
+<tr><td>上記以外（悪意・有過失）</td><td><strong>20年</strong></td></tr>
+</tbody></table></div>
+<ul><li>要件：<strong>所有の意思</strong>をもって、平穏・公然に占有。賃借人の占有では所有権は時効取得できない</li>
+<li>善意・無過失は<strong>占有開始時</strong>にあればよい（途中で悪意になっても10年）</li>
+<li>前の占有者の占有期間を<strong>あわせて主張</strong>できる（その場合は前の占有者の悪意・過失も引き継ぐ）</li></ul>
+<h3>消滅時効（債権）</h3>
+<div class="formula">知った時から <b>5年</b> ／ 行使できる時から <b>10年</b>（早いほう）</div>
+<ul><li>人の生命・身体の侵害による損害賠償請求権は、行使できる時から<strong>20年</strong></li>
+<li><strong>所有権</strong>は消滅時効にかからない</li></ul>
+<h3>援用・放棄・完成猶予・更新</h3>
+<ul><li>時効の効果は<strong>援用</strong>しないと生じない。効果は起算日にさかのぼる</li>
+<li>時効の利益は<strong>あらかじめ（完成前に）放棄できない</strong>。完成後の放棄は可</li>
+<li>債務者が<strong>承認</strong>すると時効は<strong>更新</strong>（ゼロから再スタート）</li>
+<li>裁判上の請求は、手続中は<strong>完成猶予</strong>、確定判決で権利が確定すると<strong>更新</strong></li>
+<li>催告（内容証明など）は<strong>6か月</strong>の完成猶予のみ</li></ul>
+`},
+
+{ id:'bukken', field:'kenri', icon:'📜', title:'物権変動と登記', sub:'対抗要件・二重譲渡・取消しと登記', gram:`
+<h3>原則：不動産は「登記」で勝負</h3>
+<p>不動産の物権変動は、<strong>登記をしなければ第三者に対抗できません</strong>（民法177条）。二重譲渡では、先に契約したかではなく<strong>先に登記した方</strong>が勝ちます。</p>
+<h3>登記なしで対抗できる「第三者でない人」</h3>
+<ul><li><strong>背信的悪意者</strong>（単なる悪意者には登記が必要）</li>
+<li><strong>不法占拠者</strong>・無権利者</li>
+<li>前主・後主の関係にある者（売主本人など）</li></ul>
+<h3>「前」か「後」かで変わる3パターン</h3>
+<div class="tblwrap"><table><thead><tr><th>場面</th><th>〜の前に現れた第三者</th><th>〜の後に現れた第三者</th></tr></thead><tbody>
+<tr><td>取消し</td><td>詐欺：善意無過失なら第三者の勝ち／強迫：取消した人の勝ち</td><td><strong>登記の先後</strong>で決める</td></tr>
+<tr><td>解除</td><td>第三者が<strong>登記</strong>を備えていれば第三者の勝ち</td><td><strong>登記の先後</strong></td></tr>
+<tr><td>取得時効の完成</td><td>時効取得者は登記なしで対抗できる</td><td><strong>登記の先後</strong></td></tr>
+</tbody></table></div>
+<div class="hbox"><span class="term">コツ</span>「後」に出てきた第三者は、どれも<strong>二重譲渡と同じ</strong>＝登記の早い者勝ち、と覚えると一気に片づきます。</div>
+<h3>相続と登記</h3>
+<p>相続による権利の承継は、<strong>法定相続分を超える部分</strong>については登記がなければ第三者に対抗できません。</p>
+`},
+
+{ id:'teitou', field:'kenri', icon:'🏦', title:'抵当権', sub:'物上代位・法定地上権・賃借人の保護', gram:`
+<h3>抵当権の性質</h3>
+<ul><li><strong>付従性</strong>（債権がなければ成立しない・消えれば消える）、<strong>随伴性</strong>、<strong>不可分性</strong>、<strong>物上代位性</strong></li>
+<li>抵当権を設定しても、設定者は目的物を<strong>使用・収益</strong>できる（占有は移らない）</li>
+<li>利息などは、後順位抵当権者などがいる場合、<strong>満期となった最後の2年分</strong>に限り優先弁済</li></ul>
+<h3>物上代位</h3>
+<p>目的物の売却代金・賃料・火災保険金などに対しても抵当権を行使できます。ただし<strong>払渡し・引渡しの前に差押え</strong>が必要です。</p>
+<h3>法定地上権の成立要件</h3>
+<ol><li>抵当権設定当時、土地の上に<strong>建物が存在</strong></li>
+<li>設定当時、土地と建物の所有者が<strong>同一</strong></li>
+<li>土地・建物の一方または両方に抵当権が設定</li>
+<li>競売の結果、土地と建物の所有者が<strong>別々</strong>になった</li></ol>
+<div class="hbox"><span class="term">一括競売</span>更地に抵当権設定後に建物が建てられた場合、抵当権者は土地と建物を<strong>一括して競売できる</strong>（優先弁済は土地の代価からのみ）。</div>
+<h3>抵当権に後れる賃借人</h3>
+<p>抵当権設定登記の後の賃借人は、抵当権者・買受人に対抗できません。ただし<strong>建物</strong>の賃借人で競売手続開始前から使用している者は、買受人の買受けの時から<strong>6か月</strong>は明渡しを猶予されます。</p>
+<h3>根抵当権</h3>
+<ul><li><strong>極度額</strong>の範囲で、一定範囲の不特定の債権を担保</li>
+<li>元本確定前は<strong>随伴性がない</strong>（被担保債権を譲渡しても根抵当権は移らない）</li>
+<li>極度額の変更には<strong>利害関係者の承諾</strong>が必要</li></ul>
+`},
+
+{ id:'shakuya', field:'kenri', icon:'🏠', title:'借地借家法（借家）', sub:'更新・解約申入れ・定期建物賃貸借', gram:`
+<h3>期間と更新</h3>
+<div class="tblwrap"><table><thead><tr><th>場面</th><th>ルール</th></tr></thead><tbody>
+<tr><td>期間1年未満の定め</td><td><strong>期間の定めのない</strong>賃貸借とみなす（定期建物賃貸借を除く）</td></tr>
+<tr><td>期間の定めあり</td><td>期間満了の<strong>1年前から6か月前</strong>までに更新しない旨の通知がなければ、従前と同一の条件で更新（期間は定めのないものとなる）</td></tr>
+<tr><td>賃貸人からの更新拒絶・解約申入れ</td><td><strong>正当事由</strong>が必要</td></tr>
+<tr><td>期間の定めなし・賃貸人から解約申入れ</td><td>申入れから<strong>6か月</strong>で終了</td></tr>
+<tr><td>期間の定めなし・賃借人から解約申入れ</td><td>民法どおり<strong>3か月</strong>で終了</td></tr>
+</tbody></table></div>
+<h3>対抗要件・その他</h3>
+<ul><li>建物の<strong>引渡し</strong>があれば、その後の建物取得者に対抗できる（登記不要）</li>
+<li><strong>造作買取請求権</strong>は特約で排除できる</li>
+<li>借賃を<strong>一定期間増額しない</strong>特約は有効。<strong>減額しない</strong>特約は、普通の建物賃貸借では無効</li></ul>
+<h3>定期建物賃貸借（更新なし）</h3>
+<ul><li><strong>書面（電磁的記録を含む）</strong>で契約する。公正証書でなくてよい</li>
+<li>契約前に「更新がなく期間満了で終了する」旨を<strong>書面を交付して説明</strong>（承諾を得て電磁的方法も可）。説明がないと更新がない旨の定めは<strong>無効</strong></li>
+<li><strong>1年未満</strong>の期間も有効</li>
+<li>期間1年以上なら、満了の1年前〜6か月前に終了の通知が必要</li>
+<li>床面積<strong>200㎡未満の居住用</strong>は、転勤・療養などやむを得ない事情で賃借人から中途解約できる</li>
+<li>借賃を減額しない特約も<strong>有効</strong></li></ul>
+`},
+
+{ id:'souzoku', field:'kenri', icon:'🌳', title:'相続', sub:'法定相続分・遺留分・放棄・遺言', gram:`
+<h3>法定相続分</h3>
+<div class="tblwrap"><table><thead><tr><th>相続人</th><th>配偶者</th><th>血族</th></tr></thead><tbody>
+<tr><td>配偶者＋子</td><td>1/2</td><td>子 1/2（人数で等分）</td></tr>
+<tr><td>配偶者＋直系尊属</td><td>2/3</td><td>直系尊属 1/3</td></tr>
+<tr><td>配偶者＋兄弟姉妹</td><td>3/4</td><td>兄弟姉妹 1/4</td></tr>
+</tbody></table></div>
+<ul><li>代襲相続の原因は<strong>死亡・欠格・廃除</strong>。<strong>相続放棄は代襲原因にならない</strong></li>
+<li>兄弟姉妹の代襲は<strong>おい・めいまで</strong></li></ul>
+<h3>承認と放棄</h3>
+<ul><li>自己のために相続の開始があったことを<strong>知った時から3か月以内</strong>に、家庭裁判所に申述</li>
+<li><strong>限定承認</strong>は共同相続人<strong>全員で</strong>しなければならない。放棄は単独でできる</li>
+<li>相続開始<strong>前</strong>の放棄はできない（遺留分の放棄は家庭裁判所の許可があれば可）</li></ul>
+<h3>遺留分</h3>
+<div class="formula">直系尊属のみ <b>1/3</b> ／ それ以外 <b>1/2</b> ／ 兄弟姉妹 <b>なし</b></div>
+<p>遺留分を侵害されたときは、受遺者などに対して<strong>金銭</strong>（遺留分侵害額）を請求します。</p>
+<h3>遺言</h3>
+<ul><li><strong>15歳</strong>に達すれば遺言できる</li>
+<li>自筆証書遺言の<strong>財産目録</strong>は自書でなくてよい（各ページに署名押印）</li>
+<li>法務局で保管された自筆証書遺言は<strong>検認不要</strong></li>
+<li>前の遺言と抵触する後の遺言 → 抵触部分は<strong>後の遺言で撤回</strong>したものとみなす</li></ul>
+`},
+
+/* ───────────── 宅建業法 ───────────── */
+{ id:'menkyo', field:'gyoho', icon:'🪪', title:'宅建業の定義と免許', sub:'取引・宅地・免許権者・欠格事由', gram:`
+<h3>「宅建業」にあたるか</h3>
+<div class="tblwrap"><table><thead><tr><th></th><th>売買</th><th>交換</th><th>貸借</th></tr></thead><tbody>
+<tr><td>自ら当事者</td><td>○</td><td>○</td><td><strong>×（不要）</strong></td></tr>
+<tr><td>代理</td><td>○</td><td>○</td><td>○</td></tr>
+<tr><td>媒介</td><td>○</td><td>○</td><td>○</td></tr>
+</tbody></table></div>
+<div class="hbox"><span class="term">最重要</span>自分のマンションを<strong>自ら貸す</strong>（転貸を含む）のは宅建業ではない → 免許不要。</div>
+<p><strong>宅地</strong>＝建物の敷地に供する目的で取引される土地、または<strong>用途地域内</strong>の土地（道路・公園・河川・広場・水路を除く）。</p>
+<h3>免許権者と有効期間</h3>
+<ul><li>事務所が<strong>2つ以上の都道府県</strong> → 国土交通大臣／<strong>1つの都道府県</strong>だけ → 都道府県知事</li>
+<li>有効期間<strong>5年</strong>。更新は満了の<strong>90日前から30日前</strong>までに申請</li>
+<li>期間内に申請したのに処分がない → 処分があるまで旧免許は<strong>有効</strong></li></ul>
+<h3>欠格事由（主なもの）</h3>
+<ul><li>破産手続開始の決定を受けて<strong>復権を得ない</strong>者（復権すれば直ちに免許を受けられる）</li>
+<li><strong>拘禁刑以上</strong>の刑に処せられ、執行を終わってから<strong>5年</strong>を経過しない者</li>
+<li>宅建業法・暴力団対策法違反、傷害・暴行・脅迫・背任などで<strong>罰金刑</strong>に処せられ5年を経過しない者</li>
+<li>暴力団員または暴力団員でなくなってから5年を経過しない者</li>
+<li>不正手段による免許取得などで<strong>免許を取り消され</strong>、5年を経過しない者</li></ul>
+<div class="wbox">⚠️ 2025年6月の刑法改正で「懲役・禁錮」は「拘禁刑」に一本化されました。古い問題集の「禁錮以上の刑」は「拘禁刑以上の刑」と読み替えます。<strong>執行猶予</strong>は、期間が満了すれば翌日から免許を受けられます。</div>
+`},
+
+{ id:'shi', field:'gyoho', icon:'👤', title:'宅建士', sub:'登録・宅建士証・専任の設置義務', gram:`
+<h3>専任の宅建士の設置</h3>
+<ul><li><strong>事務所</strong>：業務に従事する者<strong>5人に1人以上</strong></li>
+<li>契約の締結や申込みを受ける<strong>案内所など</strong>：<strong>1人以上</strong></li>
+<li>不足したら<strong>2週間以内</strong>に補充などの措置</li></ul>
+<h3>登録</h3>
+<ul><li>試験合格＋<strong>2年以上の実務経験</strong>（または国土交通大臣の登録実務講習修了）</li>
+<li>登録先は<strong>受験した都道府県の知事</strong>。登録に有効期間はない</li>
+<li>氏名・住所・本籍・勤務先の宅建業者の商号などが変わったら<strong>遅滞なく変更の登録</strong></li>
+<li>登録の移転は<strong>任意</strong>（勤務先が他県に変わったときに申請できる）。住所変更だけでは移転できない</li></ul>
+<h3>宅建士証</h3>
+<ul><li>有効期間<strong>5年</strong></li>
+<li>交付申請前<strong>6か月以内</strong>に行われる知事指定の<strong>法定講習</strong>を受講（試験合格後<strong>1年以内</strong>なら免除）</li>
+<li><strong>重要事項の説明</strong>のときは、請求がなくても<strong>提示</strong>しなければならない</li>
+<li>取引の関係者から請求があったときも提示</li>
+<li>氏名・住所を変更したら、変更の登録とあわせて<strong>書換え交付</strong>を申請</li></ul>
+<h3>宅建士だけができる3つの事務</h3>
+<div class="formula">① 重要事項の<b>説明</b>　② 重要事項説明書への<b>記名</b>　③ 37条書面への<b>記名</b></div>
+<p>専任である必要はありません（専任でない宅建士でもできる）。</p>
+`},
+
+{ id:'hosho', field:'gyoho', icon:'💴', title:'営業保証金と保証協会', sub:'供託額・期限・還付', gram:`
+<h3>2つの制度の比較</h3>
+<div class="tblwrap"><table><thead><tr><th></th><th>営業保証金</th><th>保証協会（弁済業務保証金）</th></tr></thead><tbody>
+<tr><td>金額</td><td>主たる事務所 <strong>1,000万円</strong><br>その他の事務所 <strong>500万円</strong>ずつ</td><td>分担金：主たる事務所 <strong>60万円</strong><br>その他の事務所 <strong>30万円</strong>ずつ</td></tr>
+<tr><td>納める先</td><td>主たる事務所の<strong>最寄りの供託所</strong></td><td><strong>保証協会</strong>に納付（協会が1週間以内に供託）</td></tr>
+<tr><td>支払方法</td><td>金銭または有価証券</td><td><strong>金銭のみ</strong></td></tr>
+<tr><td>事務所を増設</td><td>供託して届け出てから業務開始</td><td>設置日から<strong>2週間以内</strong>に納付</td></tr>
+<tr><td>還付の上限</td><td>供託額</td><td>営業保証金に相当する額</td></tr>
+</tbody></table></div>
+<h3>有価証券の評価</h3>
+<div class="formula">国債 <b>100%</b> ／ 地方債・政府保証債 <b>90%</b> ／ その他 <b>80%</b></div>
+<h3>還付を受けられる人</h3>
+<p>宅建業者と<strong>宅建業に関する取引</strong>をして債権を持つ者。ただし<strong>宅建業者は除く</strong>。広告代金・内装工事代金などは対象外です。</p>
+<h3>期限まわり</h3>
+<ul><li>免許を受けてから<strong>3か月以内</strong>に供託の届出がない → 知事等は催告。催告から<strong>1か月以内</strong>に届出がなければ免許を取り消すことが<strong>できる</strong></li>
+<li>還付で不足した → 通知を受けた日から<strong>2週間以内</strong>に補充</li>
+<li>取戻し：原則<strong>6か月以上</strong>の期間を定めて公告が必要（保証協会への加入や、二重供託の場合などは公告不要）</li></ul>
+`},
+
+{ id:'juusetsu', field:'gyoho', icon:'📑', title:'重要事項説明（35条）と37条書面', sub:'誰に・いつ・誰が・何を', gram:`
+<h3>2つの書面の比較</h3>
+<div class="tblwrap"><table><thead><tr><th></th><th>35条書面（重要事項説明）</th><th>37条書面（契約書面）</th></tr></thead><tbody>
+<tr><td>時期</td><td>契約が<strong>成立するまで</strong></td><td>契約成立後<strong>遅滞なく</strong></td></tr>
+<tr><td>相手</td><td>買主・借主など<strong>取得する側</strong></td><td>契約の<strong>両当事者</strong></td></tr>
+<tr><td>宅建士の説明</td><td><strong>必要</strong>（宅建士証を提示）</td><td>不要</td></tr>
+<tr><td>宅建士の記名</td><td>必要</td><td>必要</td></tr>
+<tr><td>相手方が宅建業者</td><td>書面の交付は必要・<strong>説明は不要</strong></td><td>交付は必要</td></tr>
+</tbody></table></div>
+<ul><li>相手方の承諾があれば、書面の交付に代えて<strong>電磁的方法</strong>で提供できる</li>
+<li>テレビ会議などによる説明（<strong>IT重説</strong>）も、一定の条件で可能</li>
+<li>説明の<strong>場所に制限はない</strong>（喫茶店でも可）</li></ul>
+<h3>35条の主な記載事項</h3>
+<ul><li>登記された権利の種類・内容、法令上の制限、私道負担（貸借の場合は建物なら不要）</li>
+<li>飲用水・電気・ガスの供給、排水施設の整備状況</li>
+<li>代金・借賃<strong>以外</strong>に授受される金銭の額と目的</li>
+<li>契約の解除、損害賠償額の予定・違約金</li>
+<li>手付金等の保全措置の概要、支払金・預り金の保全措置の有無</li>
+<li>造成宅地防災区域・土砂災害警戒区域・津波災害警戒区域、<strong>水害ハザードマップ</strong>上の所在地</li>
+<li>建物状況調査（インスペクション）の有無と結果の概要（既存建物）</li></ul>
+<div class="hbox"><span class="term">見分け方</span>「代金の額・支払時期」「引渡し時期」「移転登記の申請時期」は<strong>37条だけ</strong>。契約で決まることだからです。</div>
+`},
+
+{ id:'hasshu', field:'gyoho', icon:'🛡️', title:'8種制限', sub:'業者が売主・素人が買主の取引', gram:`
+<h3>適用される場面</h3>
+<p><strong>売主が宅建業者</strong>で、<strong>買主が宅建業者でない</strong>場合だけ。業者間取引や、媒介・代理には適用されません。</p>
+<h3>クーリング・オフ</h3>
+<ul><li><strong>事務所等以外</strong>の場所で買受けの申込み・契約をした場合に使える</li>
+<li>買主が<strong>自ら申し出た</strong>自宅・勤務先で申込み → 使えない。喫茶店・ホテルのロビー・テント張りの案内所 → 使える</li>
+<li>使えなくなる：クーリング・オフできる旨と方法を<strong>書面で告げられた日から8日</strong>経過／<strong>引渡しを受け、かつ代金全部を支払った</strong></li>
+<li><strong>書面</strong>で行い、<strong>発した時</strong>に効力が生じる。業者は受領した手付金等を速やかに返還し、損害賠償・違約金を請求できない</li>
+<li>買主に不利な特約は無効</li></ul>
+<h3>数字で出る制限</h3>
+<div class="tblwrap"><table><thead><tr><th>制限</th><th>内容</th></tr></thead><tbody>
+<tr><td>損害賠償額の予定・違約金</td><td>合計で代金の<strong>2/10</strong>まで。超える部分は無効</td></tr>
+<tr><td>手付の額</td><td>代金の<strong>2/10</strong>まで。性質は<strong>解約手付</strong>とされる</td></tr>
+<tr><td>手付金等の保全措置</td><td>未完成物件：代金の<strong>5%</strong>超 または <strong>1,000万円</strong>超<br>完成物件：代金の<strong>10%</strong>超 または <strong>1,000万円</strong>超</td></tr>
+<tr><td>担保責任の特約</td><td>通知期間を<strong>引渡しから2年以上</strong>とする特約は有効。それ以外で民法より不利な特約は無効</td></tr>
+<tr><td>割賦販売の解除</td><td><strong>30日以上</strong>の期間を定めて<strong>書面で催告</strong></td></tr>
+<tr><td>所有権留保</td><td>代金の<strong>3/10</strong>を超える支払いを受けたら原則不可</td></tr>
+</tbody></table></div>
+<div class="hbox"><span class="term">解約手付</span>買主は手付を<strong>放棄</strong>、売主は手付の<strong>倍額を現実に提供</strong>して解除できる（相手方が履行に着手するまで）。</div>
+`},
+
+{ id:'houshu', field:'gyoho', icon:'🧮', title:'報酬の制限', sub:'売買・貸借・低廉な空家等', gram:`
+<h3>売買の媒介（1つの依頼者から受け取れる上限・税抜）</h3>
+<div class="tblwrap"><table><thead><tr><th>代金（税抜）</th><th>料率</th></tr></thead><tbody>
+<tr><td>200万円以下の部分</td><td>5%</td></tr>
+<tr><td>200万円超〜400万円以下の部分</td><td>4%</td></tr>
+<tr><td>400万円を超える部分</td><td>3%</td></tr>
+</tbody></table></div>
+<div class="formula">400万円超の速算式：代金 × <b>3%</b> ＋ <b>6万円</b><span class="fnote">課税事業者は ×1.1（免税事業者は ×1.04）</span></div>
+<ul><li><strong>代理</strong>：媒介の<strong>2倍</strong>まで。相手方からも受け取るときは、合計で媒介の2倍まで</li>
+<li>建物の代金は<strong>税抜</strong>にしてから計算（土地は非課税）</li>
+<li>依頼者の依頼による<strong>広告料金</strong>、特別な依頼による費用は別に受領できる</li></ul>
+<h3>貸借</h3>
+<ul><li>貸主・借主<strong>双方から合計</strong>で借賃の<strong>1か月分</strong>（＋消費税）まで</li>
+<li><strong>居住用建物</strong>の媒介は、依頼者の<strong>一方から0.5か月分</strong>まで（依頼の承諾を得ていれば、合計1か月分の範囲で配分可）</li>
+<li>居住用建物<strong>以外</strong>で<strong>権利金</strong>の授受がある場合は、権利金を売買代金とみなして計算できる</li></ul>
+<h3>低廉な空家等の特例（2024年7月改正）</h3>
+<p>代金<strong>800万円以下</strong>の宅地・建物の売買の媒介・代理では、現地調査等の費用を含めて<strong>30万円（税抜）</strong>まで受領できます。媒介契約の締結時に、あらかじめ依頼者に説明して<strong>合意</strong>しておくことが必要です。</p>
+<div class="wbox">⚠️ 改正前は「400万円以下・売主から18万円まで」でした。古い問題集は要注意。</div>
+`},
+
+/* ───────────── 法令上の制限 ───────────── */
+{ id:'kaihatsu', field:'horei', icon:'🗺️', title:'都市計画法（開発許可）', sub:'許可が要らない規模と例外', gram:`
+<h3>開発行為とは</h3>
+<p>主として<strong>建築物の建築</strong>または<strong>特定工作物の建設</strong>のために行う、土地の<strong>区画形質の変更</strong>。開発行為をするには原則として<strong>知事等の許可</strong>が必要です。</p>
+<h3>規模による例外（これ未満なら許可不要）</h3>
+<div class="tblwrap"><table><thead><tr><th>区域</th><th>許可不要の規模</th></tr></thead><tbody>
+<tr><td>市街化区域</td><td><strong>1,000㎡未満</strong>（三大都市圏の一部は500㎡未満）</td></tr>
+<tr><td>市街化調整区域</td><td><strong>規模にかかわらず許可必要</strong></td></tr>
+<tr><td>非線引き区域・準都市計画区域</td><td><strong>3,000㎡未満</strong></td></tr>
+<tr><td>上記以外（区域外）</td><td><strong>1ha未満</strong></td></tr>
+</tbody></table></div>
+<h3>規模に関係なく許可不要のもの</h3>
+<ul><li><strong>農林漁業用</strong>の建築物（農家の住宅を含む）のための開発行為 ── ただし<strong>市街化区域では対象外</strong>（規模要件で判断）</li>
+<li>駅舎・図書館・公民館・変電所など<strong>公益上必要な建築物</strong>のための開発行為（学校・病院・社会福祉施設は含まれない）</li>
+<li>都市計画事業・土地区画整理事業などの<strong>施行として</strong>行うもの</li>
+<li><strong>非常災害</strong>のための応急措置、<strong>通常の管理行為</strong>・軽易な行為</li></ul>
+<div class="hbox"><span class="term">判断の順番</span>① 開発行為か？ → ② 例外（農林漁業用・公益・事業の施行・災害）か？ → ③ 区域ごとの規模未満か？</div>
+<h3>許可後の流れ</h3>
+<ul><li>開発区域内では、工事完了の<strong>公告前</strong>は原則として建築できない</li>
+<li>許可申請の前に、関係する公共施設の管理者と<strong>協議・同意</strong></li></ul>
+`},
+
+{ id:'kenchiku', field:'horei', icon:'🏢', title:'建築基準法', sub:'道路・用途制限・建蔽率・容積率', gram:`
+<h3>接道義務</h3>
+<p>建築物の敷地は、原則として幅員<strong>4m以上</strong>の道路に<strong>2m以上</strong>接していなければなりません。4m未満でも、特定行政庁が指定したものは道路とみなされ（2項道路）、道路の中心線から<strong>2m</strong>後退した線が道路境界線とみなされます。</p>
+<h3>建蔽率の緩和（+1/10）</h3>
+<ul><li><strong>防火地域内</strong>の耐火建築物等</li>
+<li><strong>準防火地域内</strong>の耐火建築物等・準耐火建築物等</li>
+<li>特定行政庁が指定する<strong>角地</strong></li>
+<li>両方満たせば <strong>+2/10</strong></li></ul>
+<div class="hbox"><span class="term">制限なし</span>建蔽率が<strong>8/10</strong>の地域で、<strong>防火地域内</strong>にある<strong>耐火建築物等</strong> → 建蔽率の制限が適用されない。</div>
+<h3>容積率と前面道路</h3>
+<p>前面道路の幅員が<strong>12m未満</strong>なら、「幅員 × 法定乗数」と都市計画の容積率の<strong>小さいほう</strong>。</p>
+<div class="formula">住居系の用途地域 × <b>4/10</b> ／ その他 × <b>6/10</b></div>
+<h3>用途制限の頻出ポイント</h3>
+<ul><li><strong>第一種低層住居専用地域</strong>：幼稚園〜高校・診療所・図書館は建てられる。<strong>大学・病院</strong>は建てられない</li>
+<li><strong>神社・寺院・教会、保育所、診療所、公衆浴場、派出所</strong>はどの用途地域でも建てられる</li>
+<li>敷地が2つの用途地域にまたがる → <strong>過半</strong>が属する地域の制限による</li></ul>
+<div class="nbox">建蔽率・容積率は、敷地がまたがる場合は<strong>面積で按分した加重平均</strong>。用途制限は「過半」。この違いがよく狙われます。</div>
+`},
+
+{ id:'nouchi', field:'horei', icon:'🌾', title:'農地法', sub:'3条・4条・5条', gram:`
+<h3>3つの許可の比較</h3>
+<div class="tblwrap"><table><thead><tr><th></th><th>3条（権利移動）</th><th>4条（転用）</th><th>5条（転用目的の権利移動）</th></tr></thead><tbody>
+<tr><td>例</td><td>農地を農地のまま売る</td><td>自分の農地を宅地にする</td><td>農地を宅地にするため買う</td></tr>
+<tr><td>許可権者</td><td><strong>農業委員会</strong></td><td>都道府県知事等</td><td>都道府県知事等</td></tr>
+<tr><td>市街化区域の特例</td><td><strong>なし</strong>（許可必要）</td><td colspan="2">あらかじめ<strong>農業委員会に届け出れば許可不要</strong></td></tr>
+<tr><td>許可がないと</td><td>契約は<strong>効力を生じない</strong></td><td>工事停止・原状回復命令</td><td>契約は効力を生じない・原状回復命令</td></tr>
+</tbody></table></div>
+<h3>許可が不要なもの（主なもの）</h3>
+<ul><li><strong>相続</strong>・遺産分割による取得（3条） ── ただし農業委員会に<strong>遅滞なく届出</strong></li>
+<li>国・都道府県が取得する場合</li>
+<li>農家が<strong>2アール未満</strong>の農地を自分の農業用施設（畜舎など）にする転用（4条）</li>
+<li><strong>抵当権の設定</strong>は権利移動にあたらない（3条許可不要）</li></ul>
+<div class="hbox"><span class="term">農地かどうか</span><strong>現況</strong>で判断します。登記簿の地目が「山林」でも、耕作していれば農地です。一時的に休耕していても農地です。</div>
+`},
+
+{ id:'kokudo', field:'horei', icon:'📮', title:'国土利用計画法（事後届出）', sub:'届出が必要な面積と手続', gram:`
+<h3>事後届出の基本</h3>
+<ul><li>届け出るのは<strong>権利取得者</strong>（買主など）だけ</li>
+<li>契約を締結した日から<strong>2週間以内</strong>に、市町村長を経由して<strong>知事</strong>へ</li>
+<li>届出事項：対価の額、土地の<strong>利用目的</strong>など</li></ul>
+<h3>届出が必要な面積</h3>
+<div class="tblwrap"><table><thead><tr><th>区域</th><th>面積</th></tr></thead><tbody>
+<tr><td>市街化区域</td><td><strong>2,000㎡以上</strong></td></tr>
+<tr><td>市街化調整区域・非線引き区域</td><td><strong>5,000㎡以上</strong></td></tr>
+<tr><td>都市計画区域外</td><td><strong>10,000㎡以上</strong></td></tr>
+</tbody></table></div>
+<p>面積は<strong>権利取得者が取得する合計</strong>で判断します（一団の土地）。売主側で分けて売っても、買主がまとめて取得すれば合算です。</p>
+<h3>届出が不要な取引</h3>
+<ul><li>当事者の一方または双方が<strong>国・地方公共団体</strong></li>
+<li>相続・時効取得・贈与など<strong>対価のない</strong>取得</li>
+<li>農地法3条の許可を受ける場合、民事調停による場合など</li></ul>
+<h3>勧告</h3>
+<ul><li>知事が勧告できるのは<strong>利用目的</strong>についてだけ（<strong>対価の額</strong>は勧告の対象外）</li>
+<li>勧告に従わない → その旨と内容を<strong>公表</strong>できる。<strong>契約は有効</strong></li>
+<li>届出をしなかった → 罰則はあるが、<strong>契約は有効</strong></li></ul>
+`},
+
+/* ───────────── 税・その他 ───────────── */
+{ id:'chihouzei', field:'zei', icon:'🧾', title:'不動産取得税と固定資産税', sub:'課税主体・非課税・特例', gram:`
+<h3>2つの税の比較</h3>
+<div class="tblwrap"><table><thead><tr><th></th><th>不動産取得税</th><th>固定資産税</th></tr></thead><tbody>
+<tr><td>課税主体</td><td><strong>都道府県</strong></td><td><strong>市町村</strong></td></tr>
+<tr><td>納税義務者</td><td>不動産を取得した者</td><td><strong>1月1日</strong>（賦課期日）現在、固定資産課税台帳に所有者として登録されている者</td></tr>
+<tr><td>課税標準</td><td>固定資産課税台帳の登録価格</td><td>固定資産課税台帳の登録価格</td></tr>
+<tr><td>免税点</td><td>土地 10万円未満 など</td><td>土地 30万円未満／家屋 20万円未満</td></tr>
+</tbody></table></div>
+<h3>不動産取得税のポイント</h3>
+<ul><li><strong>相続・法人の合併</strong>による取得は<strong>非課税</strong>。<strong>贈与</strong>・交換による取得は<strong>課税</strong></li>
+<li>家屋の改築で価格が増加した場合も、取得とみなして課税</li>
+<li>新築住宅（床面積50㎡以上240㎡以下）は課税標準から<strong>1,200万円控除</strong></li>
+<li>宅地の課税標準を<strong>1/2</strong>にする特例あり</li></ul>
+<h3>固定資産税のポイント</h3>
+<ul><li>年の途中で売却しても、その年度の納税義務者は<strong>1月1日の所有者</strong>（売主）</li>
+<li>標準税率 <strong>1.4%</strong></li>
+<li>住宅用地の課税標準の特例：<strong>200㎡以下の部分は1/6</strong>、それを超える部分は<strong>1/3</strong></li>
+<li>新築住宅は一定期間、120㎡までの部分の税額を<strong>1/2</strong>に減額</li></ul>
+<div class="wbox">⚠️ 税の特例には適用期限があり、毎年の税制改正で延長・変更されます。受験年度の4月1日時点の内容を必ず確認してください。</div>
+`},
+
+{ id:'keihyo', field:'zei', icon:'📰', title:'景品表示法（表示規約）', sub:'免除科目・広告表示のルール', menjo:true, gram:`
+<h3>この単元は何？</h3>
+<p>不動産広告の表示ルール（不動産の表示に関する公正競争規約）。<strong>問47</strong>前後で例年1問。登録講習修了者は免除です。</p>
+<h3>数字で出るルール</h3>
+<div class="tblwrap"><table><thead><tr><th>項目</th><th>ルール</th></tr></thead><tbody>
+<tr><td>徒歩所要時間</td><td>道路距離<strong>80mにつき1分</strong>。1分未満の端数は<strong>1分</strong>として計算</td></tr>
+<tr><td>新築</td><td>建築後<strong>1年未満</strong>で、居住の用に供されたことがないもの</td></tr>
+<tr><td>自転車</td><td>道路距離を明示して所要時間を表示</td></tr>
+</tbody></table></div>
+<h3>よく出る禁止・義務</h3>
+<ul><li><strong>おとり広告</strong>（実際には取引できない・する意思のない物件の広告）は禁止。契約済みの物件を更新せず掲載し続けるのも該当しうる</li>
+<li>「最高」「日本一」「格安」などの用語は、<strong>客観的・合理的な根拠</strong>があり、その根拠となる事実を併記する場合などに限り使用可</li>
+<li>土地取引で、建築条件付土地はその旨と条件の内容を明示</li>
+<li>電車・バスなどの所要時間は、乗換え・待ち時間を含むかどうかを明示</li>
+<li>過去の販売価格を比較対照価格にする（二重価格表示）には厳しい条件あり</li></ul>
+`}
+];
+
+</script>
+<script>
+/* ═══════════════════════════════════════════════════════════
+   KEYSTONE 宅建 — オリジナル問題（過去問“型”の自作問題）
+   キー：
+     id        一意のID（o-単元-番号）
+     unit      units.js の id
+     field     kenri / gyoho / horei / zei（unit があれば省略可）
+     kind      single（通常4択） / count（個数・組合せ）
+     polarity  correct＝「正しいものはどれか」 wrong＝「誤っているものはどれか」
+               → これがあると各肢が自動で○×一問一答になる（計算問題などは省略）
+     stem      問題文
+     stmts     個数問題のア〜エ [{t, ok, why}]（ok＝その記述が正しいか）
+     choices   選択肢4つ
+     answer    正解（1〜4）
+     why       各選択肢の解説
+     exp       全体の解説
+   ═══════════════════════════════════════════════════════════ */
+window.ORIG_Q = [
+
+/* ───────────── 意思表示 ───────────── */
+{ id:'o-ishi-1', unit:'ishi', kind:'single', polarity:'wrong',
+  stem:'Aが所有する甲土地の売買に関する次の記述のうち、民法の規定及び判例によれば、誤っているものはどれか。',
+  choices:[
+    'AがBと通謀して甲土地をBに仮装譲渡し、Bが事情を知らないCに転売した場合、Cに過失があったとしても、AはCに対して売買の無効を主張することができない。',
+    'AがBの強迫により甲土地をBに売却し、Bが事情を知らず過失もないCに転売した後にAが売買を取り消した場合、AはCに対して取消しを対抗することができる。',
+    'AがBの詐欺により甲土地をBに売却し、Bが事情を知らず過失もないCに転売した後にAが売買を取り消した場合、AはCに対して取消しを対抗することができる。',
+    'AがCの詐欺によって甲土地をBに売却した場合、Bがその詐欺の事実を知っていたときは、Aは売買契約を取り消すことができる。'],
+  answer:3,
+  why:[
+    '虚偽表示の無効は「善意の第三者」に対抗できない。第三者の無過失は要求されない。',
+    '強迫による取消しは、善意無過失の第三者にも対抗できる。',
+    '詐欺による取消しは、善意無過失の第三者に対抗できない。これが誤り。',
+    '第三者による詐欺は、相手方が悪意（または有過失）なら取り消せる。'],
+  exp:'第三者保護の要件の比較問題。虚偽表示＝善意、詐欺・錯誤＝善意無過失、強迫＝保護なし。' },
+
+{ id:'o-ishi-2', unit:'ishi', kind:'single', polarity:'correct',
+  stem:'錯誤に関する次の記述のうち、民法の規定によれば、正しいものはどれか。',
+  choices:[
+    '法律行為の目的及び取引上の社会通念に照らして重要な錯誤に基づく意思表示は、無効である。',
+    '表意者が重大な過失によって錯誤に陥っていた場合には、相手方が表意者の錯誤を知っていたときであっても、表意者は意思表示を取り消すことができない。',
+    '表意者が法律行為の基礎とした事情についての認識が真実に反する錯誤は、その事情が法律行為の基礎とされていることが表示されていなければ、取り消すことができない。',
+    '錯誤による意思表示の取消しは、善意の第三者に対しては、その第三者の過失の有無を問わず対抗することができない。'],
+  answer:3,
+  why:[
+    '改正民法では錯誤は「無効」ではなく「取消し」。',
+    '重過失があっても、相手方が悪意・重過失のときや相手方も同一の錯誤に陥っていたときは取り消せる。',
+    '動機（基礎事情）の錯誤は、その事情が法律行為の基礎とされていることが表示されていたときに限り取り消せる。正しい。',
+    '錯誤の取消しを対抗できないのは「善意でかつ過失がない」第三者。過失ある善意の第三者には対抗できる。'],
+  exp:'2020年改正後の錯誤（民法95条）の要件を一通り確認する問題。' },
+
+{ id:'o-ishi-3', unit:'ishi', kind:'single', polarity:'correct',
+  stem:'意思表示に関する次の記述のうち、民法の規定によれば、正しいものはどれか。',
+  choices:[
+    'AがBに対し、冗談で甲土地を贈与すると告げた場合、Bがそれを冗談であると知っていたときでも、贈与は有効である。',
+    '表意者が真意ではないことを知ってした意思表示は、相手方がその意思表示が表意者の真意ではないことを知ることができたときは、無効となる。',
+    '心裡留保による意思表示の無効は、善意の第三者に対しても対抗することができる。',
+    '第三者が強迫を行った場合、相手方がその事実を知らず、かつ知らないことに過失がなかったときは、表意者は意思表示を取り消すことができない。'],
+  answer:2,
+  why:[
+    '心裡留保は原則有効だが、相手方が悪意（真意でないと知っていた）なら無効。',
+    '相手方が悪意または有過失なら無効。正しい。',
+    '心裡留保の無効は善意の第三者に対抗できない（93条2項）。',
+    '第三者の強迫は、相手方の善意・悪意を問わず取り消せる。'],
+  exp:'心裡留保：原則有効・相手方が悪意／有過失なら無効・善意の第三者に対抗不可。' },
+
+/* ───────────── 制限行為能力者 ───────────── */
+{ id:'o-seigen-1', unit:'seigen', kind:'single', polarity:'wrong',
+  stem:'制限行為能力者に関する次の記述のうち、民法の規定によれば、誤っているものはどれか。',
+  choices:[
+    '未成年者が、法定代理人の同意を得ずに、単に義務を免れる法律行為をした場合、その行為を取り消すことはできない。',
+    '成年被後見人が、成年後見人の同意を得て土地を売却した場合、その売買契約を取り消すことはできない。',
+    '被保佐人が、保佐人の同意を得ずに自己所有の土地を売却した場合、その売買契約を取り消すことができる。',
+    '成年後見人が、成年被後見人に代わってその居住の用に供する建物を売却するには、家庭裁判所の許可を得なければならない。'],
+  answer:2,
+  why:[
+    '単に権利を得、または義務を免れる行為は、未成年者が単独でできる。',
+    '成年被後見人の行為は、成年後見人の同意があっても取り消せる（日用品の購入など日常生活に関する行為を除く）。これが誤り。',
+    '不動産の売買は保佐人の同意が必要な行為。同意がなければ取り消せる。',
+    '居住用不動産の処分には家庭裁判所の許可が必要。'],
+  exp:'「同意があっても取り消せる」のは成年被後見人だけ、という点が最頻出。' },
+
+{ id:'o-seigen-2', unit:'seigen', kind:'single', polarity:'correct',
+  stem:'制限行為能力者に関する次の記述のうち、民法の規定によれば、正しいものはどれか。',
+  choices:[
+    '18歳の者が、親の同意を得ずに締結した土地の売買契約は、取り消すことができる。',
+    '制限行為能力者の行為の取消しは、善意かつ無過失の第三者に対抗することができない。',
+    '被補助人が補助人の同意を得ずに不動産を売却した場合、その売買契約は常に取り消すことができる。',
+    '制限行為能力者が、行為能力者であることを信じさせるため詐術を用いたときは、その行為を取り消すことができない。'],
+  answer:4,
+  why:[
+    '成年年齢は18歳。18歳の者は行為能力者なので取り消せない。',
+    '制限行為能力を理由とする取消しは、善意無過失の第三者にも対抗できる。',
+    '被補助人が同意を要するのは、家庭裁判所が定めた「特定の法律行為」だけ。常に取り消せるわけではない。',
+    '詐術を用いた場合は取り消せない（民法21条）。正しい。'],
+  exp:'取消しの対抗：制限行為能力・強迫は第三者に対抗できる、詐欺・錯誤は善意無過失の第三者に対抗できない。' },
+
+/* ───────────── 代理 ───────────── */
+{ id:'o-dairi-1', unit:'dairi', kind:'single', polarity:'correct',
+  stem:'代理に関する次の記述のうち、民法の規定によれば、正しいものはどれか。',
+  choices:[
+    '代理人が本人のためにすることを示さないでした意思表示は、相手方が、代理人が本人のためにすることを知っていたときでも、代理人自身のためにしたものとみなされる。',
+    '本人が未成年者を代理人に選任した場合、その代理人がした契約は、代理人が未成年者であることを理由として取り消すことができる。',
+    '本人が無権代理行為を追認したときは、別段の意思表示がない限り、契約の時にさかのぼってその効力を生ずる。',
+    '委任による代理人は、本人の許諾がなくても、自由に復代理人を選任することができる。'],
+  answer:3,
+  why:[
+    '相手方が本人のためにすることを知り、または知ることができたときは、本人に効果が帰属する。',
+    '制限行為能力者が代理人としてした行為は、行為能力の制限を理由に取り消せない（102条）。',
+    '追認は契約時にさかのぼって効力を生ずる（116条）。正しい。',
+    '任意代理人が復代理人を選任できるのは、本人の許諾があるときかやむを得ない事由があるときに限られる。'],
+  exp:'代理の基本ルール（顕名・代理人の能力・追認・復代理）の確認。' },
+
+{ id:'o-dairi-2', unit:'dairi', kind:'single', polarity:'wrong',
+  stem:'代理権を有しないAが、B所有の甲土地をBの代理人と称してCに売却した場合に関する次の記述のうち、民法の規定及び判例によれば、誤っているものはどれか。',
+  choices:[
+    'Cは、Bに対し、相当の期間を定めて追認するかどうかを催告することができ、Bがその期間内に確答をしないときは、追認を拒絶したものとみなされる。',
+    'Cは、Aに代理権がないことを知っていた場合であっても、Bが追認をしない間は、売買契約を取り消すことができる。',
+    'Bが死亡し、AがBを単独で相続した場合、Aは本人の資格において追認を拒絶することはできない。',
+    'Aが死亡し、BがAを相続した場合、Bは本人の資格において追認を拒絶することができる。'],
+  answer:2,
+  why:[
+    '催告に確答がなければ追認拒絶とみなされる（114条）。',
+    '取消権を行使できるのは善意の相手方だけ（115条）。悪意のCは取り消せない。これが誤り。',
+    '無権代理人が本人を単独相続した場合、本人が自ら法律行為をしたのと同様に扱われ、追認拒絶は信義則上許されない（判例）。',
+    '本人が無権代理人を相続した場合、本人は追認を拒絶しても信義則に反しない（判例）。ただし無権代理人の責任は承継しうる。'],
+  exp:'無権代理の相手方の手段：催告（悪意でも可）／取消し（善意）／責任追及（原則善意無過失）。' },
+
+/* ───────────── 時効 ───────────── */
+{ id:'o-jiko-1', unit:'jiko', kind:'single', polarity:'wrong',
+  stem:'時効に関する次の記述のうち、民法の規定及び判例によれば、誤っているものはどれか。',
+  choices:[
+    '所有の意思をもって、平穏かつ公然と他人の土地を占有した者は、占有の開始の時に善意かつ無過失であれば、10年間の占有によってその所有権を取得する。',
+    '占有の開始の時に善意かつ無過失であった者が、その後に自己に所有権がないことを知った場合には、取得時効に必要な占有期間は20年となる。',
+    '土地の賃借人として占有を継続しても、その土地の所有権を時効により取得することはできない。',
+    '所有権は、消滅時効にかからない。'],
+  answer:2,
+  why:[
+    '善意無過失で占有を開始すれば10年（162条2項）。',
+    '善意無過失は占有開始時に判断する。途中で悪意になっても10年のまま。これが誤り。',
+    '賃借人には「所有の意思」がないため、所有権の時効取得はできない。',
+    '所有権は消滅時効にかからない（166条2項）。'],
+  exp:'取得時効の善意無過失は「占有開始時」で判断する、がポイント。' },
+
+{ id:'o-jiko-2', unit:'jiko', kind:'single', polarity:'correct',
+  stem:'時効に関する次の記述のうち、民法の規定によれば、正しいものはどれか。',
+  choices:[
+    '時効の利益は、時効の完成前にあらかじめ放棄することができる。',
+    '債権者が内容証明郵便により債務者に支払を催告した場合、消滅時効は更新され、新たにその進行を始める。',
+    '債権は、債権者が権利を行使することができることを知った時から10年間行使しないときは、時効によって消滅する。',
+    '債務者が債権者に対して債務の存在を承認した場合、時効は更新され、新たにその進行を始める。'],
+  answer:4,
+  why:[
+    '時効の利益はあらかじめ放棄できない（146条）。完成後の放棄は可。',
+    '催告は6か月間の完成猶予にとどまり、更新の効果はない。',
+    '「知った時から」は5年。「行使できる時から」が10年。',
+    '承認は時効の更新事由（152条）。正しい。'],
+  exp:'完成猶予（一時停止）と更新（リセット）の区別が問われる。' },
+
+/* ───────────── 物権変動と登記 ───────────── */
+{ id:'o-bukken-1', unit:'bukken', kind:'single', polarity:'correct',
+  stem:'Aが所有する甲土地をBに売却した場合に関する次の記述のうち、民法の規定及び判例によれば、正しいものはどれか。',
+  choices:[
+    'Bへの移転登記前に、AがCにも甲土地を売却してCが先に所有権移転登記をした場合、CがAB間の売買を単に知っていたにすぎないときでも、BはCに対して所有権を対抗することができる。',
+    '甲土地を不法に占拠しているDに対し、Bは、所有権移転登記を備えていなくても、所有権を主張して明渡しを請求することができる。',
+    'AがBの詐欺を理由にAB間の売買を取り消した後、BがCに甲土地を転売して所有権移転登記をした場合、Aは登記がなくてもCに対して所有権を対抗することができる。',
+    'Bが甲土地を時効取得した後に、AがCに甲土地を売却してCが所有権移転登記をした場合、Bは登記がなくてもCに対して時効取得を対抗することができる。'],
+  answer:2,
+  why:[
+    '単なる悪意者も「第三者」にあたるので、登記を先に備えたCが優先する。背信的悪意者なら結論は逆。',
+    '不法占拠者は177条の第三者にあたらないため、登記なしで対抗できる。正しい。',
+    '取消し後の第三者とは対抗関係になり、登記の先後で決まる。Cの勝ち。',
+    '時効完成後の第三者とは対抗関係。登記を先に備えたCが優先する。'],
+  exp:'「後」に現れた第三者は二重譲渡と同じ＝登記で決まる、で一気に解ける問題。' },
+
+{ id:'o-bukken-2', unit:'bukken', kind:'count',
+  stem:'Aから甲土地を買い受けたBが、所有権移転登記をしていない場合において、Bが登記なくして甲土地の所有権を対抗することができる者は、次のアからエのうちいくつあるか。',
+  stmts:[
+    { t:'Bは、AB間の売買を知りながら、Bに高値で売りつける目的でAから甲土地を買い受けて登記をした背信的悪意者Cに対して、登記がなくても所有権を対抗できる。', ok:true, why:'背信的悪意者は177条の第三者にあたらない。' },
+    { t:'Bは、AB間の売買を知っていただけのDが、Aから甲土地を買い受けて登記をした場合、Dに対して登記がなくても所有権を対抗できる。', ok:false, why:'単なる悪意者は第三者にあたる。登記を先に備えたDが優先。' },
+    { t:'Bは、甲土地を権原なく占拠しているEに対して、登記がなくても所有権を対抗できる。', ok:true, why:'不法占拠者は第三者にあたらない。' },
+    { t:'Bが甲土地を買い受けた後に、甲土地を占有していたFの取得時効が完成した場合、Bは、登記がなくてもFに対して所有権を対抗できる。', ok:false, why:'Bは時効完成「前」の第三者。時効取得者Fは登記なしでBに対抗できるので、BはFに対抗できない。' }],
+  choices:['一つ','二つ','三つ','四つ'], answer:2,
+  why:['','正しい記述はア・ウの二つ。','',''],
+  exp:'登記なしで対抗できるのは「第三者にあたらない者」（背信的悪意者・不法占拠者・無権利者など）。' },
+
+/* ───────────── 抵当権 ───────────── */
+{ id:'o-teitou-1', unit:'teitou', kind:'single', polarity:'wrong',
+  stem:'抵当権に関する次の記述のうち、民法の規定及び判例によれば、誤っているものはどれか。',
+  choices:[
+    '抵当権者は、抵当不動産の賃料について、その払渡し前に差押えをすれば、物上代位により優先弁済を受けることができる。',
+    '抵当権設定当時、土地の上に建物が存在し、土地と建物が同一の所有者に属していた場合において、競売の結果、土地と建物の所有者が異なるに至ったときは、法定地上権が成立する。',
+    '更地に抵当権が設定された後に、その土地上に建物が築造された場合、抵当権者は土地と建物を一括して競売することができ、建物の代価からも優先弁済を受けることができる。',
+    '抵当権者は、後順位抵当権者がいる場合、利息については満期となった最後の2年分についてのみ、抵当権を行使することができる。'],
+  answer:3,
+  why:[
+    '賃料にも物上代位できる。払渡し前の差押えが必要。',
+    '法定地上権の成立要件どおり。',
+    '一括競売はできるが、優先弁済を受けられるのは土地の代価のみ。これが誤り。',
+    '利息等は最後の2年分に限られる（375条）。'],
+  exp:'一括競売：競売は一括でできるが、優先弁済は「土地の代価」からだけ。' },
+
+{ id:'o-teitou-2', unit:'teitou', kind:'single', polarity:'correct',
+  stem:'抵当権及び根抵当権に関する次の記述のうち、民法の規定によれば、正しいものはどれか。',
+  choices:[
+    '抵当権設定登記後に建物を賃借し、競売手続の開始前から使用している賃借人は、その建物の競売における買受人の買受けの時から6か月を経過するまでは、建物を買受人に引き渡すことを要しない。',
+    '元本の確定前に根抵当権者から被担保債権を譲り受けた者は、その債権について根抵当権を行使することができる。',
+    '根抵当権の極度額の変更は、利害関係を有する者の承諾を得ずにすることができる。',
+    '抵当権者は、抵当権の設定を受けることにより、抵当不動産を占有することができる。'],
+  answer:1,
+  why:[
+    '建物明渡猶予制度（395条）。正しい。',
+    '元本確定前の根抵当権には随伴性がない。譲受人は根抵当権を行使できない。',
+    '極度額の変更には利害関係者の承諾が必要。',
+    '抵当権は非占有担保。設定者が引き続き使用・収益できる。'],
+  exp:'根抵当権は「元本確定前は随伴性なし」「極度額変更は利害関係者の承諾」。' },
+
+/* ───────────── 借地借家法（借家） ───────────── */
+{ id:'o-shakuya-1', unit:'shakuya', kind:'single', polarity:'correct',
+  stem:'建物の賃貸借（定期建物賃貸借及び一時使用目的のものを除く）に関する次の記述のうち、借地借家法の規定によれば、正しいものはどれか。',
+  choices:[
+    '期間を6か月と定めた建物の賃貸借は、期間を1年と定めたものとみなされる。',
+    '期間の定めのない建物の賃貸借において、賃貸人が正当事由のある解約の申入れをした場合、賃貸借は申入れの日から3か月を経過することによって終了する。',
+    '建物の賃借人は、建物の引渡しを受けていれば、その後にその建物について物権を取得した者に対して、賃借権を対抗することができる。',
+    '建物の賃貸人の同意を得て付加した造作について、賃借人が造作買取請求権を行使できないとする特約は無効である。'],
+  answer:3,
+  why:[
+    '期間1年未満の定めは「期間の定めのない」賃貸借とみなされる（29条）。',
+    '賃貸人からの解約申入れは6か月で終了（27条）。3か月は賃借人からの申入れ（民法）。',
+    '建物の引渡しが対抗要件（31条）。正しい。',
+    '造作買取請求権は特約で排除できる。'],
+  exp:'借家の数字：1年未満→期間の定めなし、賃貸人の解約申入れ→6か月、更新拒絶の通知→1年前〜6か月前。' },
+
+{ id:'o-shakuya-2', unit:'shakuya', kind:'single', polarity:'wrong',
+  stem:'借地借家法第38条の定期建物賃貸借に関する次の記述のうち、誤っているものはどれか。',
+  choices:[
+    '定期建物賃貸借の契約は、書面（電磁的記録を含む）によってしなければならないが、公正証書による必要はない。',
+    '賃貸人が、契約の更新がなく期間満了により終了する旨を、あらかじめ書面を交付して説明しなかったときは、契約の更新がないこととする旨の定めは無効となる。',
+    '定期建物賃貸借では、期間を1年未満とすることはできない。',
+    '定期建物賃貸借において、借賃を減額しない旨の特約は有効である。'],
+  answer:3,
+  why:[
+    '書面（電磁的記録を含む）であればよく、公正証書に限られない。',
+    '事前説明がなければ「更新しない」旨の定めは無効（普通借家になる）。',
+    '定期建物賃貸借は1年未満の期間も有効。これが誤り。',
+    '定期建物賃貸借では借賃増減請求権を排除する特約が有効。'],
+  exp:'定期借家は「書面で契約」「事前に書面で説明」「1年未満も可」「減額しない特約も有効」。' },
+
+/* ───────────── 相続 ───────────── */
+{ id:'o-souzoku-1', unit:'souzoku', kind:'single',
+  stem:'Aが死亡し、相続人として配偶者B、子C及び子Dがいる。Dは適法に相続を放棄した。Dには子Eがいる。この場合のCの法定相続分として、民法の規定によれば、正しいものはどれか。',
+  choices:['4分の1','3分の1','2分の1','3分の2'],
+  answer:3,
+  why:[
+    '放棄がなければCは1/4だが、Dの放棄により子はCだけになる。',
+    '代襲相続を前提にした計算ミス。',
+    '放棄したDは初めから相続人でなかったとみなされ、Eは代襲相続しない。配偶者B 1/2、子C 1/2。正しい。',
+    '配偶者と子の相続分は1/2ずつ。'],
+  exp:'相続放棄は代襲原因ではない（死亡・欠格・廃除のみ）。' },
+
+{ id:'o-souzoku-2', unit:'souzoku', kind:'single', polarity:'wrong',
+  stem:'相続及び遺言に関する次の記述のうち、民法の規定によれば、誤っているものはどれか。',
+  choices:[
+    '相続の放棄をしようとする者は、自己のために相続の開始があったことを知った時から3か月以内に、家庭裁判所に申述しなければならない。',
+    '相続人が数人あるときは、限定承認は、共同相続人の全員が共同してのみこれをすることができる。',
+    '法務局に保管されている自筆証書遺言については、家庭裁判所の検認を受ける必要はない。',
+    '被相続人の兄弟姉妹は、遺留分として法定相続分の2分の1を有する。'],
+  answer:4,
+  why:[
+    '熟慮期間は知った時から3か月（915条）。',
+    '限定承認は全員共同で（923条）。',
+    '遺言書保管制度を利用した自筆証書遺言は検認不要。',
+    '兄弟姉妹に遺留分はない（1042条）。これが誤り。'],
+  exp:'遺留分は兄弟姉妹「なし」、直系尊属のみなら1/3、それ以外は1/2。' },
+
+/* ───────────── 宅建業の定義と免許 ───────────── */
+{ id:'o-menkyo-1', unit:'menkyo', kind:'single', polarity:'correct',
+  stem:'宅地建物取引業の免許（以下「免許」という）に関する次の記述のうち、宅地建物取引業法の規定によれば、正しいものはどれか。',
+  choices:[
+    'Aが、自ら所有するマンションを、不特定多数の者に反復継続して賃貸する場合、Aは免許を受ける必要がある。',
+    'Bが、用途地域内にある自己所有の農地を区画割りして、不特定多数の者に反復継続して売却する場合、Bは免許を受ける必要はない。',
+    'Cが、他人の所有するアパートの貸借の媒介を、不特定多数の者に反復継続して行う場合、Cは免許を受ける必要がある。',
+    'Dが、自ら賃借した建物を、不特定多数の者に反復継続して転貸する場合、Dは免許を受ける必要がある。'],
+  answer:3,
+  why:[
+    '自ら貸借（自ら賃貸）は「取引」にあたらないため免許不要。',
+    '用途地域内の土地は（道路・公園などを除き）宅地にあたる。売買を業として行うので免許が必要。',
+    '貸借の媒介は「取引」にあたる。免許が必要。正しい。',
+    '転貸も「自ら貸借」なので免許不要。'],
+  exp:'自ら貸借（転貸を含む）だけが宅建業から外れる。' },
+
+{ id:'o-menkyo-2', unit:'menkyo', kind:'single', polarity:'wrong',
+  stem:'宅地建物取引業の免許に関する次の記述のうち、宅地建物取引業法の規定によれば、誤っているものはどれか。',
+  choices:[
+    '破産手続開始の決定を受けた者は、復権を得た日から5年を経過しなければ、免許を受けることができない。',
+    '2以上の都道府県の区域内に事務所を設置して宅地建物取引業を営もうとする者は、国土交通大臣の免許を受けなければならない。',
+    '免許の有効期間は5年であり、免許の更新を受けようとする者は、有効期間満了の日の90日前から30日前までの間に申請をしなければならない。',
+    '免許の更新の申請があった場合において、有効期間の満了の日までにその申請について処分がなされないときは、従前の免許は、有効期間の満了後もその処分がなされるまでの間は、なお効力を有する。'],
+  answer:1,
+  why:[
+    '破産者は復権を得れば直ちに免許を受けられる。5年待つ必要はない。これが誤り。',
+    '事務所が2以上の都道府県にあれば大臣免許。',
+    '更新申請は満了の90日前から30日前まで。',
+    '処分があるまで旧免許は有効（3条4項）。'],
+  exp:'欠格事由のうち「5年待ち」が不要なのは破産者（復権すればすぐOK）。' },
+
+/* ───────────── 宅建士 ───────────── */
+{ id:'o-shi-1', unit:'shi', kind:'single', polarity:'wrong',
+  stem:'宅地建物取引士に関する次の記述のうち、宅地建物取引業法の規定によれば、誤っているものはどれか。',
+  choices:[
+    '宅地建物取引業者は、その事務所ごとに、業務に従事する者5人に1人以上の割合で、成年者である専任の宅地建物取引士を置かなければならない。',
+    '宅地建物取引士証の交付を受けようとする者は、宅地建物取引士資格試験に合格した日から1年以内であっても、法定講習を受講しなければならない。',
+    '宅地建物取引士は、重要事項の説明をするときは、説明の相手方から請求がなくても、宅地建物取引士証を提示しなければならない。',
+    '37条書面への記名は、専任でない宅地建物取引士が行ってもよい。'],
+  answer:2,
+  why:[
+    '事務所は5人に1人以上の専任の宅建士。',
+    '試験合格後1年以内に交付を受ける場合は、法定講習が免除される。これが誤り。',
+    '重要事項説明時は請求がなくても提示が必要。',
+    '宅建士の事務（説明・記名）は専任でなくてもできる。'],
+  exp:'法定講習：申請前6か月以内の講習を受講。ただし合格後1年以内なら免除。' },
+
+{ id:'o-shi-2', unit:'shi', kind:'single', polarity:'correct',
+  stem:'宅地建物取引士の登録に関する次の記述のうち、宅地建物取引業法の規定によれば、正しいものはどれか。',
+  choices:[
+    '宅地建物取引士の登録を受けている者が住所を他の都道府県に移転した場合、登録の移転を申請しなければならない。',
+    '宅地建物取引士の登録には5年の有効期間があり、更新を受けなければ効力を失う。',
+    '専任の宅地建物取引士が退職して法定数に不足することとなった場合、宅地建物取引業者は30日以内に必要な措置を執らなければならない。',
+    '宅地建物取引士は、勤務先の宅地建物取引業者の商号に変更があったときは、遅滞なく、変更の登録を申請しなければならない。'],
+  answer:4,
+  why:[
+    '登録の移転は任意。しかも住所の移転だけでは申請できない（勤務先が他県になったときに申請できる）。',
+    '登録自体に有効期間はない。5年なのは宅建士証。',
+    '補充は2週間以内。',
+    '勤務先業者の商号・名称・免許証番号は登録事項。変更の登録が必要。正しい。'],
+  exp:'登録に期限はない／宅建士証は5年／登録の移転は任意（勤務先が他県のとき）。' },
+
+/* ───────────── 営業保証金と保証協会 ───────────── */
+{ id:'o-hosho-1', unit:'hosho', kind:'single', polarity:'wrong',
+  stem:'宅地建物取引業者A（本店と支店2か所を有する）の営業保証金に関する次の記述のうち、宅地建物取引業法の規定によれば、誤っているものはどれか。',
+  choices:[
+    'Aは、本店の最寄りの供託所に営業保証金を供託しなければならない。',
+    'Aが供託すべき営業保証金の額は、合計2,000万円である。',
+    'Aは、営業保証金の供託に地方債証券を充てる場合、その額面金額の100%を有価証券の価額とすることができる。',
+    'Aと宅地建物取引業に関する取引をした宅地建物取引業者は、その取引により生じた債権について、Aが供託した営業保証金から還付を受けることができない。'],
+  answer:3,
+  why:[
+    '主たる事務所の最寄りの供託所に一括して供託する。',
+    '本店1,000万円＋支店500万円×2＝2,000万円。',
+    '地方債証券は額面の90%。100%は国債証券だけ。これが誤り。',
+    '還付を受けられる者から宅建業者は除かれる。'],
+  exp:'有価証券の評価：国債100%・地方債／政府保証債90%・その他80%。' },
+
+{ id:'o-hosho-2', unit:'hosho', kind:'single', polarity:'correct',
+  stem:'宅地建物取引業保証協会（以下「保証協会」という）に関する次の記述のうち、宅地建物取引業法の規定によれば、正しいものはどれか。',
+  choices:[
+    '保証協会に加入しようとする宅地建物取引業者は、加入した日から1週間以内に、弁済業務保証金分担金を納付しなければならない。',
+    '本店と支店1か所を有する宅地建物取引業者が保証協会に加入する場合、納付すべき弁済業務保証金分担金の額は90万円である。',
+    '弁済業務保証金分担金は、国債証券などの有価証券で納付することができる。',
+    '保証協会の社員が新たに事務所を設置したときは、その日から1か月以内に弁済業務保証金分担金を納付しなければならない。'],
+  answer:2,
+  why:[
+    '分担金は「加入しようとする日まで」に納付。1週間は保証協会が供託所に供託する期限。',
+    '本店60万円＋支店30万円＝90万円。正しい。',
+    '分担金は金銭のみ。',
+    '新事務所の分担金は設置の日から2週間以内。'],
+  exp:'保証協会：60万／30万・金銭のみ・加入日まで・新事務所は2週間以内。' },
+
+/* ───────────── 35条・37条 ───────────── */
+{ id:'o-juusetsu-1', unit:'juusetsu', kind:'single', polarity:'wrong',
+  stem:'宅地建物取引業法第35条の重要事項の説明及び第37条の書面に関する次の記述のうち、誤っているものはどれか。',
+  choices:[
+    '重要事項の説明は、契約が成立するまでの間に行わなければならない。',
+    '買主が宅地建物取引業者である場合、重要事項説明書を交付すれば、重要事項の説明は省略することができる。',
+    '37条書面には宅地建物取引士が記名しなければならないが、その内容を宅地建物取引士が説明する必要はない。',
+    '重要事項の説明は、宅地建物取引業者の事務所で行わなければならない。'],
+  answer:4,
+  why:[
+    '35条の説明は契約成立前。',
+    '相手方が業者なら説明は不要だが、書面（電磁的方法を含む）の交付は必要。',
+    '37条書面は記名のみ。説明義務はない。',
+    '説明の場所に制限はない。これが誤り。'],
+  exp:'35条：成立前・取得者に・宅建士が説明＋記名。37条：成立後遅滞なく・両当事者に・記名のみ。' },
+
+{ id:'o-juusetsu-2', unit:'juusetsu', kind:'count',
+  stem:'宅地建物取引業者が宅地の売買を媒介し、契約が成立した場合に交付する37条書面の記載事項に関する次の記述のうち、正しいものはいくつあるか。',
+  stmts:[
+    { t:'売買の37条書面には、代金の額並びにその支払の時期及び方法を必ず記載しなければならない。', ok:true, why:'必要的記載事項。' },
+    { t:'売買の37条書面には、宅地の引渡しの時期を必ず記載しなければならない。', ok:true, why:'必要的記載事項。' },
+    { t:'売買の37条書面には、移転登記の申請の時期を必ず記載しなければならない。', ok:true, why:'必要的記載事項（貸借では不要）。' },
+    { t:'飲用水・電気・ガスの供給並びに排水のための施設の整備の状況は、37条書面の必要的記載事項である。', ok:false, why:'これは35条（重要事項説明）の記載事項。' }],
+  choices:['一つ','二つ','三つ','四つ'], answer:3,
+  why:['','','正しいのはア・イ・ウの三つ。',''],
+  exp:'「契約で決まること」（代金・引渡し時期・登記申請時期）は37条、「物件の調査結果」は35条。' },
+
+/* ───────────── 8種制限 ───────────── */
+{ id:'o-hasshu-1', unit:'hasshu', kind:'single', polarity:'correct',
+  stem:'宅地建物取引業者Aが自ら売主となり、宅地建物取引業者でないBと宅地の売買契約を締結した場合のクーリング・オフに関する次の記述のうち、宅地建物取引業法の規定によれば、正しいものはどれか。',
+  choices:[
+    'Bが自ら申し出た喫茶店で買受けの申込みをした場合、Bはクーリング・オフによる契約の解除をすることができない。',
+    'Bが自ら申し出た自宅で売買契約を締結した場合、Bはクーリング・オフによる契約の解除をすることができる。',
+    'クーリング・オフについて書面で告げられた日から8日以内に、Bが契約解除の書面を発した場合、その書面がAに到達したのが8日経過後であっても、解除の効力が生じる。',
+    'Bが宅地の引渡しを受けた場合、代金の全部を支払っていなくても、Bはクーリング・オフによる契約の解除をすることができない。'],
+  answer:3,
+  why:[
+    '喫茶店は、自ら申し出た場合でも「事務所等」にあたらない。クーリング・オフできる。',
+    '買主が自ら申し出た自宅・勤務先は、クーリング・オフできない場所。',
+    'クーリング・オフは書面を発した時に効力が生ずる（発信主義）。正しい。',
+    'できなくなるのは「引渡し」と「代金全額の支払い」の両方を満たしたとき。'],
+  exp:'自ら申し出た「自宅・勤務先」だけが例外的にクーリング・オフ不可。喫茶店はできる。' },
+
+{ id:'o-hasshu-2', unit:'hasshu', kind:'single', polarity:'wrong',
+  stem:'宅地建物取引業者Aが自ら売主となり、宅地建物取引業者でないBと建物の売買契約を締結する場合に関する次の記述のうち、宅地建物取引業法の規定によれば、誤っているものはどれか。',
+  choices:[
+    '代金3,000万円の売買契約において、損害賠償の予定額と違約金の合計額を600万円とする特約は有効である。',
+    '工事完了前の建物（代金5,000万円）の売買で、Aが手付金200万円を受領する場合、手付金等の保全措置を講じる必要はない。',
+    '工事完了後の建物（代金4,000万円）の売買で、Aが手付金500万円を受領する場合、手付金等の保全措置を講じる必要はない。',
+    '契約不適合責任について、Bがその不適合をAに通知すべき期間を引渡しの日から2年間とする特約は有効である。'],
+  answer:3,
+  why:[
+    '代金の2/10（600万円）以内なので有効。',
+    '未完成物件の基準は代金の5%（250万円）超または1,000万円超。200万円なので保全措置不要。',
+    '完成物件の基準は代金の10%（400万円）超または1,000万円超。500万円は10%を超えるので保全措置が必要。これが誤り。',
+    '通知期間を引渡しから2年以上とする特約は有効。'],
+  exp:'手付金等の保全：未完成5%・完成10%、いずれも1,000万円超なら必要。' },
+
+{ id:'o-hasshu-3', unit:'hasshu', kind:'single', polarity:'correct',
+  stem:'宅地建物取引業者Aが自ら売主となり、宅地建物取引業者でないBと締結した建物の売買契約において、Aが手付を受領した場合に関する次の記述のうち、宅地建物取引業法の規定によれば、正しいものはどれか。',
+  choices:[
+    'Aは、Bが契約の履行に着手した後であっても、手付の倍額を現実に提供すれば、契約を解除することができる。',
+    'Bは、Aが契約の履行に着手するまでは、手付を放棄して契約を解除することができる。',
+    '当事者間で手付を違約手付とする特約を定めた場合、その手付は解約手付としての性質を有しない。',
+    'Aが宅地建物取引業者であるCと売買契約を締結する場合であっても、代金の2/10を超える手付を受領することはできない。'],
+  answer:2,
+  why:[
+    '相手方が履行に着手した後は、手付による解除はできない。',
+    '相手方（売主A）の履行着手までは、手付放棄で解除できる。正しい。',
+    '業者が売主の場合、受領した手付は、特約にかかわらず解約手付の性質を有する。',
+    '8種制限は業者間取引には適用されない。'],
+  exp:'8種制限は「業者が売主・素人が買主」の場合だけ。業者間取引には適用なし。' },
+
+/* ───────────── 報酬 ───────────── */
+{ id:'o-houshu-1', unit:'houshu', kind:'single',
+  stem:'宅地建物取引業者A（消費税課税事業者）は、売主Bから宅地（代金2,000万円）の売買の媒介の依頼を受け、買主Cとの間で売買契約を成立させた。AがBから受領することができる報酬の上限額として、宅地建物取引業法の規定によれば、正しいものはどれか。',
+  choices:['66万円','72万6,000円','132万円','145万2,000円'],
+  answer:2,
+  why:[
+    '税抜の額。課税事業者は1.1倍できる。',
+    '2,000万円×3%＋6万円＝66万円。課税事業者なので×1.1＝72万6,000円。正しい。',
+    '代理の場合の税抜上限（媒介の2倍）。',
+    '代理の場合の税込上限。'],
+  exp:'土地の代金は非課税なのでそのまま計算。速算式 3%＋6万円 → ×1.1。' },
+
+{ id:'o-houshu-2', unit:'houshu', kind:'single',
+  stem:'宅地建物取引業者A（消費税課税事業者）は、売主Bから宅地（代金5,000万円）の売買の代理の依頼を受け、買主Cからも媒介の依頼を受けて、売買契約を成立させた。AがB及びCから受領することができる報酬の合計額の上限として、宅地建物取引業法の規定によれば、正しいものはどれか。',
+  choices:['171万6,000円','312万円','343万2,000円','514万8,000円'],
+  answer:3,
+  why:[
+    '媒介1件分（156万円×1.1）。',
+    '税抜の合計上限。課税事業者は×1.1できる。',
+    '媒介の上限156万円（5,000万×3%＋6万）の2倍＝312万円、×1.1＝343万2,000円。正しい。',
+    '代理（2倍）と媒介（1倍）を単純に足した額。合計は媒介の2倍が上限。'],
+  exp:'代理＋相手方からの媒介でも、受け取れる合計は「媒介の2倍」まで。' },
+
+{ id:'o-houshu-3', unit:'houshu', kind:'single', polarity:'wrong',
+  stem:'宅地建物取引業者が受領する報酬に関する次の記述のうち、宅地建物取引業法の規定によれば、誤っているものはどれか。',
+  choices:[
+    '居住用建物の貸借の媒介において、依頼者の双方から受領できる報酬の合計額は、借賃の1か月分に消費税相当額を加えた額以内である。',
+    '居住用建物の貸借の媒介において、依頼者の承諾を得ていない場合、依頼者の一方から受領できる報酬の額は、借賃の0.5か月分に消費税相当額を加えた額以内である。',
+    '事務所用建物の貸借の媒介において権利金の授受がある場合、その権利金の額を売買代金とみなして報酬を計算することができる。',
+    '依頼者の依頼によらずに行った広告の料金であっても、実費であれば、報酬とは別に依頼者から受領することができる。'],
+  answer:4,
+  why:[
+    '貸借は双方合計で1か月分＋消費税が上限。',
+    '居住用建物の媒介は、承諾がなければ一方から0.5か月分まで。',
+    '居住用建物以外の貸借で権利金があれば、権利金を売買代金とみなして計算できる。',
+    '報酬と別に受領できる広告料金は「依頼者の依頼による」ものだけ。これが誤り。'],
+  exp:'報酬と別にもらえるのは「依頼による広告料金」と「特別の依頼による費用」。' },
+
+/* ───────────── 開発許可 ───────────── */
+{ id:'o-kaihatsu-1', unit:'kaihatsu', kind:'single', polarity:'correct',
+  stem:'都市計画法の開発許可に関する次の記述のうち、正しいものはどれか。なお、許可を要する開発行為の面積について、条例による定めはないものとする。',
+  choices:[
+    '市街化区域内において、住宅の建築を目的として行う1,500㎡の開発行為は、開発許可を受ける必要がない。',
+    '市街化調整区域内において、農業を営む者の居住の用に供する建築物の建築を目的として行う開発行為は、開発許可を受ける必要がない。',
+    '市街化区域内において、農業用倉庫の建築を目的として行う1,200㎡の開発行為は、開発許可を受ける必要がない。',
+    '準都市計画区域内において、分譲住宅の建築を目的として行う4,000㎡の開発行為は、開発許可を受ける必要がない。'],
+  answer:2,
+  why:[
+    '市街化区域は1,000㎡以上で許可が必要。',
+    '市街化区域以外では、農林漁業用建築物（農家の住宅を含む）のための開発行為は許可不要。正しい。',
+    '市街化区域では農林漁業用の例外がない。1,000㎡以上なので許可が必要。',
+    '準都市計画区域は3,000㎡以上で許可が必要。'],
+  exp:'農林漁業用の例外は「市街化区域では使えない」が頻出のひっかけ。' },
+
+{ id:'o-kaihatsu-2', unit:'kaihatsu', kind:'single', polarity:'wrong',
+  stem:'都市計画法の開発許可に関する次の記述のうち、誤っているものはどれか。',
+  choices:[
+    '図書館の建築を目的として行う開発行為は、その規模にかかわらず、開発許可を受ける必要がない。',
+    '病院の建築を目的として行う開発行為は、公益上必要な建築物のための開発行為として、開発許可を受ける必要がない。',
+    '土地区画整理事業の施行として行う開発行為は、開発許可を受ける必要がない。',
+    '都市計画区域及び準都市計画区域外の区域内において行う9,000㎡の開発行為は、開発許可を受ける必要がない。'],
+  answer:2,
+  why:[
+    '図書館は公益上必要な建築物にあたり、許可不要。',
+    '病院・学校・社会福祉施設は、公益上必要な建築物の例外から外されている。許可が必要（規模要件による）。これが誤り。',
+    '都市計画事業・土地区画整理事業などの施行として行うものは許可不要。',
+    '区域外は1ha（10,000㎡）以上で許可が必要。9,000㎡は不要。'],
+  exp:'駅舎・図書館・公民館・変電所＝例外OK、学校・病院・社会福祉施設＝例外NG。' },
+
+/* ───────────── 建築基準法 ───────────── */
+{ id:'o-kenchiku-1', unit:'kenchiku', kind:'single', polarity:'wrong',
+  stem:'建築基準法に関する次の記述のうち、誤っているものはどれか。',
+  choices:[
+    '建築物の敷地は、原則として、幅員4m以上の道路に2m以上接しなければならない。',
+    '第一種低層住居専用地域内においては、大学を建築することができない。',
+    '建築物の敷地が2つの用途地域にわたる場合、その建築物の用途制限は、敷地の過半が属する用途地域の規定による。',
+    '建築物の敷地が建蔽率の異なる2つの地域にわたる場合、その建築物の建蔽率は、敷地の過半が属する地域の建蔽率による。'],
+  answer:4,
+  why:[
+    '接道義務の原則どおり。',
+    '大学は第一種・第二種低層住居専用地域、田園住居地域では建築できない。',
+    '用途制限は過半主義。',
+    '建蔽率・容積率は、各地域の面積で按分した加重平均で計算する。これが誤り。'],
+  exp:'用途制限＝過半主義、建蔽率・容積率＝加重平均。' },
+
+{ id:'o-kenchiku-2', unit:'kenchiku', kind:'single', polarity:'correct',
+  stem:'建築基準法に関する次の記述のうち、正しいものはどれか。',
+  choices:[
+    '第一種低層住居専用地域内においては、診療所を建築することができない。',
+    '都市計画において定められた建蔽率の限度が10分の8とされている地域内で、かつ、防火地域内にある耐火建築物等については、建蔽率の制限は適用されない。',
+    '前面道路の幅員が12m以上である場合でも、容積率は、前面道路の幅員に10分の4を乗じた数値以下でなければならない。',
+    '準防火地域内にある準耐火建築物等については、建蔽率の緩和は受けられない。'],
+  answer:2,
+  why:[
+    '診療所はすべての用途地域で建築できる。',
+    '建蔽率8/10の地域で防火地域内の耐火建築物等は、建蔽率の制限なし。正しい。',
+    '前面道路による容積率の制限は、幅員12m未満の場合だけ。',
+    '準防火地域内の耐火建築物等・準耐火建築物等は、建蔽率が1/10緩和される。'],
+  exp:'建蔽率の緩和は「防火地域の耐火」「準防火地域の耐火・準耐火」「角地」。' },
+
+/* ───────────── 農地法 ───────────── */
+{ id:'o-nouchi-1', unit:'nouchi', kind:'single', polarity:'correct',
+  stem:'農地法に関する次の記述のうち、正しいものはどれか。',
+  choices:[
+    '相続により農地を取得した場合、農地法第3条第1項の許可は不要であるが、遅滞なく、その農地の存する市町村の農業委員会にその旨を届け出なければならない。',
+    '市街化区域内の農地を耕作の目的で取得する場合、あらかじめ農業委員会に届け出れば、農地法第3条第1項の許可を受ける必要はない。',
+    '農地に抵当権を設定する場合、農地法第3条第1項の許可を受ける必要がある。',
+    '登記簿上の地目が山林である土地は、現に耕作の目的に供されていても、農地法上の農地にはあたらない。'],
+  answer:1,
+  why:[
+    '相続は3条許可不要。ただし農業委員会への届出が必要。正しい。',
+    '市街化区域の届出特例は4条・5条だけ。3条にはない。',
+    '抵当権の設定は権利移動にあたらず、3条許可は不要。',
+    '農地かどうかは現況で判断する。'],
+  exp:'市街化区域の特例（届出で足りる）は「転用（4条・5条）」だけ。' },
+
+{ id:'o-nouchi-2', unit:'nouchi', kind:'single', polarity:'wrong',
+  stem:'農地法に関する次の記述のうち、誤っているものはどれか。',
+  choices:[
+    '市街化区域内の農地を宅地に転用する目的で取得する場合、あらかじめ農業委員会に届け出れば、農地法第5条第1項の許可を受ける必要はない。',
+    '農地法第3条第1項の許可を受けないでした農地の売買契約は、その効力を生じない。',
+    '農業者が、自己所有の農地のうち2アール未満を自己の農作物の育成の用に供する農業用施設に転用する場合、農地法第4条第1項の許可を受ける必要はない。',
+    '自己所有の農地を一時的に資材置場として利用する場合は、転用にあたらないため、農地法第4条第1項の許可を受ける必要はない。'],
+  answer:4,
+  why:[
+    '市街化区域内は、あらかじめ届け出れば5条許可不要。',
+    '3条許可のない売買は効力を生じない。',
+    '2アール未満の農業用施設への自己転用は4条許可不要。',
+    '一時的な利用でも農地以外のものにすれば転用にあたる。許可が必要。これが誤り。'],
+  exp:'一時転用でも許可は必要。' },
+
+/* ───────────── 国土利用計画法 ───────────── */
+{ id:'o-kokudo-1', unit:'kokudo', kind:'single', polarity:'wrong',
+  stem:'国土利用計画法第23条の事後届出（以下「事後届出」という）に関する次の記述のうち、誤っているものはどれか。',
+  choices:[
+    '事後届出は、権利取得者が、契約を締結した日から起算して2週間以内に行わなければならない。',
+    '市街化区域内の1,500㎡の土地を売買した場合、買主は事後届出をする必要はない。',
+    'Aが所有する市街化調整区域内の6,000㎡の土地を、3,000㎡ずつに分割してB及びCに売却した場合、B及びCはそれぞれ事後届出をしなければならない。',
+    '売買契約の当事者の一方が地方公共団体である場合、事後届出をする必要はない。'],
+  answer:3,
+  why:[
+    '権利取得者が、契約締結日から2週間以内に届け出る。',
+    '市街化区域は2,000㎡以上が対象。',
+    '面積は権利取得者ごとに判断する。B・Cともに3,000㎡で、5,000㎡未満なので届出不要。これが誤り。',
+    '国・地方公共団体が当事者なら届出不要。'],
+  exp:'事後届出の面積は「買主側」の合計で判断する。' },
+
+{ id:'o-kokudo-2', unit:'kokudo', kind:'single', polarity:'correct',
+  stem:'国土利用計画法第23条の事後届出に関する次の記述のうち、正しいものはどれか。',
+  choices:[
+    '都道府県知事は、事後届出に係る土地の対価の額が著しく適正を欠くときは、対価の額を引き下げるよう勧告することができる。',
+    '都道府県知事の勧告に従わなかった場合、その土地の売買契約は無効となる。',
+    '相続により都市計画区域外の1haの土地を取得した者は、事後届出をしなければならない。',
+    '事後届出が必要な売買契約について届出をしなかった場合でも、その売買契約は有効である。'],
+  answer:4,
+  why:[
+    '事後届出の勧告は「利用目的」についてだけ。対価の額は勧告の対象外。',
+    '勧告に従わなくても契約は有効。公表されることがある。',
+    '相続は対価のない取得なので届出不要。',
+    '無届でも契約は有効（罰則はある）。正しい。'],
+  exp:'事後届出：勧告は利用目的のみ・契約はいつでも有効。' },
+
+/* ───────────── 不動産取得税・固定資産税 ───────────── */
+{ id:'o-chihouzei-1', unit:'chihouzei', kind:'single', polarity:'correct',
+  stem:'不動産取得税及び固定資産税に関する次の記述のうち、正しいものはどれか。',
+  choices:[
+    '不動産取得税は、相続による不動産の取得には課されないが、贈与による不動産の取得には課される。',
+    '不動産取得税は、不動産の所在する市町村が課する。',
+    '固定資産税の納税義務者は、その年の4月1日現在において固定資産課税台帳に所有者として登録されている者である。',
+    '住宅用地のうち200㎡以下の部分の固定資産税の課税標準は、価格の3分の1の額とされる。'],
+  answer:1,
+  why:[
+    '相続・法人の合併は非課税、贈与は課税。正しい。',
+    '不動産取得税は都道府県税。',
+    '賦課期日は1月1日。',
+    '200㎡以下の小規模住宅用地は1/6。1/3はそれを超える部分。'],
+  exp:'取得税＝都道府県、固定資産税＝市町村・1月1日。' },
+
+{ id:'o-chihouzei-2', unit:'chihouzei', kind:'single', polarity:'wrong',
+  stem:'不動産取得税及び固定資産税に関する次の記述のうち、誤っているものはどれか。',
+  choices:[
+    '年の途中で土地の売買があった場合でも、その年度の固定資産税の納税義務者は、1月1日現在の所有者として登録されている売主である。',
+    '家屋を改築したことにより家屋の価格が増加した場合でも、新たな家屋の取得ではないため、不動産取得税は課されない。',
+    '法人の合併による不動産の取得には、不動産取得税は課されない。',
+    '固定資産税の標準税率は、100分の1.4である。'],
+  answer:2,
+  why:[
+    '賦課期日（1月1日）の登録者が納税義務者。',
+    '改築で価格が増加した場合は、その増加分について取得とみなして課税される。これが誤り。',
+    '法人の合併は非課税。',
+    '標準税率は1.4%。'],
+  exp:'改築による価格の増加は「取得とみなす」。' },
+
+/* ───────────── 景品表示法（免除科目） ───────────── */
+{ id:'o-keihyo-1', unit:'keihyo', kind:'single', polarity:'correct',
+  stem:'宅地建物取引業者が行う広告に関する次の記述のうち、不当景品類及び不当表示防止法（不動産の表示に関する公正競争規約を含む）の規定によれば、正しいものはどれか。',
+  choices:[
+    '徒歩による所要時間は、道路距離80mにつき1分間を要するものとして算出し、1分未満の端数が生じたときは切り捨てて表示する。',
+    '建築後1年未満の建物であっても、居住の用に供されたことがあるものは、「新築」と表示することはできない。',
+    '実際には取引する意思のない物件であっても、問い合わせを集める目的であれば、広告に掲載しても不当表示にはあたらない。',
+    '「日本一」という用語は、客観的な根拠がなくても、主観的な評価であることを示せば使用できる。'],
+  answer:2,
+  why:[
+    '1分未満の端数は「1分」として計算（切り上げ）。',
+    '「新築」は建築後1年未満、かつ、居住の用に供されたことがないもの。正しい。',
+    '取引する意思のない物件の広告はおとり広告として禁止。',
+    '最上級を意味する用語は、合理的な根拠を示す資料があり、根拠となる事実を併記する場合などに限られる。'],
+  exp:'徒歩は80m＝1分・端数切り上げ。新築＝1年未満＋未入居。' }
+];
+
+</script>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   KEYSTONE 宅建 — エンジン
+   ・コンテンツ：data/units.js（UNITS）・data/questions.js（ORIG_Q）
+   ・取り込んだ過去問：localStorage（GitHubには載らない）
+   ═══════════════════════════════════════════════════════════ */
+const VERSION='2026-10-07a';
+const LS={ get(k,d){ try{ const v=JSON.parse(localStorage.getItem(k)); return v==null?d:v; }catch(e){ return d; } },
+           set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ toast('保存できませんでした（容量不足の可能性）',true); return false; } } };
+const K={ hist:'ks_hist', ox:'ks_ox', keep:'ks_keep', exams:'ks_exams', imports:'ks_imports', set:'ks_set', last:'ks_last' };
+
+const FIELDS={
+  kenri:{ name:'権利関係',     icon:'⚖️', n:14, color:'var(--f-kenri)' },
+  horei:{ name:'法令上の制限', icon:'🏗️', n:8,  color:'var(--f-horei)' },
+  zei:  { name:'税・その他',   icon:'🧾', n:8,  color:'var(--f-zei)' },
+  gyoho:{ name:'宅建業法',     icon:'🏢', n:20, color:'var(--f-gyoho)' }
+};
+const FORDER=['kenri','gyoho','horei','zei'];        // 学習の並び
+const EXAM_ORDER=['kenri','horei','zei','gyoho'];    // 本試験の並び（問1〜）
+/* 本試験の問番号 → 分野（例年の配置） */
+function fieldOfNo(n){ if(n<=14) return 'kenri'; if(n<=22) return 'horei'; if(n<=25) return 'zei'; if(n<=45) return 'gyoho'; return 'zei'; }
+const MARK=['1','2','3','4'];
+const SL='アイウエオカ';
+
+const UNITS_ = (window.UNITS||[]);
+const UMAP={}; UNITS_.forEach(u=>UMAP[u.id]=u);
+let ALLQ=[], QMAP={};
+let SETS=[];   // 取り込みセット
+
+function settings(){ return Object.assign({ pass:37, menjo:false }, LS.get(K.set,{})); }
+
+/* ── 問題の正規化 ── */
+function normQ(q, src, setId){
+  const o=Object.assign({},q);
+  o.src=src; o.setId=setId||null;
+  o.ans=(typeof q.answer==='number')? q.answer-1 : 0;   // データは 1〜4、内部は 0〜3
+  if(!o.field && o.no) o.field=fieldOfNo(o.no);
+  if(!o.field && o.unit && UMAP[o.unit]) o.field=UMAP[o.unit].field;
+  if(!FIELDS[o.field]) o.field='kenri';
+  o.kind=o.kind||(o.stmts&&o.stmts.length?'count':'single');
+  o.why=o.why||[]; o.stmts=o.stmts||[];
+  return o;
+}
+function loadImports(){ return LS.get(K.imports,[]); }
+function rebuild(){
+  SETS=loadImports();
+  ALLQ=(window.ORIG_Q||[]).map(q=>normQ(q,'orig'));
+  SETS.forEach(s=>s.questions.forEach(q=>ALLQ.push(normQ(q,'imp',s.id))));
+  QMAP={}; ALLQ.forEach(q=>QMAP[q.id]=q);
+}
+
+/* ── ○× の肢を問題から取り出す ── */
+function stmtsOf(q){
+  if(q.stmts&&q.stmts.length) return q.stmts.map((s,i)=>({ key:q.id+'#s'+i, qid:q.id, t:s.t, ok:!!s.ok, why:s.why||'', lbl:SL[i] }));
+  if(q.polarity==='correct'||q.polarity==='wrong')
+    return q.choices.map((c,i)=>({ key:q.id+'#c'+i, qid:q.id, t:c, ok:q.polarity==='correct'? i===q.ans : i!==q.ans, why:q.why[i]||'', lbl:MARK[i] }));
+  return [];
+}
+
+/* ── 記録 ── */
+function hist(){ return LS.get(K.hist,{}); }
+function recQ(qid,ok){ const h=hist(); const r=h[qid]||{n:0,c:0}; r.n++; if(ok) r.c++; r.last=ok?1:0; r.t=Date.now(); h[qid]=r; LS.set(K.hist,h); }
+function oxh(){ return LS.get(K.ox,{}); }
+function recOX(key,ok){ const h=oxh(); const r=h[key]||{n:0,c:0}; r.n++; if(ok) r.c++; r.last=ok?1:0; r.t=Date.now(); h[key]=r; LS.set(K.ox,h); }
+function keeps(){ return LS.get(K.keep,{}); }
+function isKept(id){ return !!keeps()[id]; }
+function toggleKeep(id,btn){ const k=keeps(); if(k[id]) delete k[id]; else k[id]=Date.now(); LS.set(K.keep,k); if(btn){ btn.classList.toggle('on',!!k[id]); btn.textContent=k[id]?'★ キープ中':'☆ キープ'; } renderSidebar(); }
+function fieldStats(field){ const h=hist(); let n=0,c=0,tried=0,total=0; ALLQ.forEach(q=>{ if(field&&q.field!==field) return; total++; const r=h[q.id]; if(r){ tried++; n++; c+=r.last; } }); return {tried,total,rate:n?c/n:null}; }
+function unitStats(uid){ const h=hist(); let tried=0,ok=0; const qs=ALLQ.filter(q=>q.unit===uid); qs.forEach(q=>{ const r=h[q.id]; if(r){ tried++; ok+=r.last; } }); return {total:qs.length,tried,ok}; }
+
+/* ── 汎用 ── */
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function rich(s){ return String(s==null?'':s).replace(/\n/g,'<br>'); }   // データは自分のものなので簡易HTMLを許可
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function pct(x){ return x==null?'—':Math.round(x*100)+'%'; }
+function fchip(f){ return '<span class="chip '+f+'">'+FIELDS[f].icon+' '+FIELDS[f].name+'</span>'; }
+function srcLabel(q){ if(q.src==='imp'){ const s=SETS.find(x=>x.id===q.setId); return (s?s.name:'取り込み')+(q.no?' 問'+q.no:''); } return 'オリジナル'+(q.exam?'（'+q.exam+'型）':''); }
+function toast(m,err){ const t=document.getElementById('toast'); t.textContent=m; t.className='show'+(err?' err':''); clearTimeout(t._t); t._t=setTimeout(()=>t.className='',2400); }
+function $c(){ return document.getElementById('content'); }
+function openModal(title,html){ document.getElementById('modal-title').textContent=title; document.getElementById('modal-body').innerHTML=html; document.getElementById('modal').classList.add('show'); }
+function closeModal(){ document.getElementById('modal').classList.remove('show'); }
+function fmtTime(s){ s=Math.max(0,s); const h=Math.floor(s/3600), m=Math.floor(s%3600/60), ss=s%60; return (h?h+':'+String(m).padStart(2,'0'):m)+':'+String(ss).padStart(2,'0'); }
+function fmtDate(t){ const d=new Date(t); return (d.getMonth()+1)+'/'+d.getDate()+' '+d.getHours()+':'+String(d.getMinutes()).padStart(2,'0'); }
+
+/* ═══════════ ナビゲーション ═══════════ */
+let VIEW='home', VIEW_ARG=null;
+const NAV=[ ['home','🏠','ホーム'], ['past','📚','過去問'], ['drill','🎯','分野別演習'], ['ox','⭕','○×一問一答'], ['mock','⏱','模擬試験'], ['review','🔁','復習'], ['stats','📊','記録'], ['import','📥','取り込み'] ];
+function go(view,arg){
+  if(EX && !confirm('試験を中断しますか？（記録は残りません）')) return;
+  EX=null; stopTimer(); VIEW=view; VIEW_ARG=arg;
+  document.body.classList.add('in-content');
+  const map={ home:renderHome, unit:renderUnit, past:renderPast, drill:renderDrill, ox:renderOXMenu, mock:renderMock, review:renderReview, stats:renderStats, import:renderImport, settings:renderSettings };
+  (map[view]||renderHome)(arg);
+  renderSidebar();
+  const t=(NAV.find(n=>n[0]===view)||[])[2] || (view==='unit'&&UMAP[arg]?UMAP[arg].title:view==='settings'?'設定':'');
+  document.getElementById('crumb-t').textContent=t||'';
+  $c().scrollTop=0;
+}
+function setCrumb(t){ document.getElementById('crumb-t').textContent=t||''; }
+function mobileBack(){ if(EX && !confirm('試験を中断しますか？（記録は残りません）')) return; EX=null; stopTimer(); document.body.classList.remove('in-content'); }
+
+function renderSidebar(){
+  document.getElementById('sb-nav').innerHTML=NAV.map(n=>'<button class="navbtn'+(VIEW===n[0]?' on':'')+'" onclick="go(\''+n[0]+'\')">'+n[1]+' '+n[2]+'</button>').join('');
+  let h='';
+  FORDER.forEach(f=>{
+    const us=UNITS_.filter(u=>u.field===f); if(!us.length) return;
+    h+='<div class="grp-lbl" style="color:'+FIELDS[f].color+'">'+FIELDS[f].icon+' '+FIELDS[f].name+'<span class="gn">本試験 '+FIELDS[f].n+'問</span></div>';
+    us.forEach(u=>{ const s=unitStats(u.id); const m=s.tried? s.ok+'/'+s.total : (s.total? '0/'+s.total:'');
+      h+='<button class="ubtn'+(VIEW==='unit'&&VIEW_ARG===u.id?' active':'')+'" onclick="go(\'unit\',\''+u.id+'\')"><span class="uicon">'+(u.icon||'•')+'</span><span class="utxt"><span class="ut-main">'+esc(u.title)+'</span>'+(u.sub?'<span class="ut-sub">'+esc(u.sub)+'</span>':'')+'</span><span class="umeter'+(s.total&&s.ok===s.total?' good':'')+'">'+m+'</span></button>'; });
+  });
+  document.getElementById('sb-list').innerHTML=h;
+}
+
+/* ═══════════ ホーム ═══════════ */
+function renderHome(){
+  const h=hist(); const tried=Object.keys(h).filter(k=>QMAP[k]).length;
+  const wrong=ALLQ.filter(q=>h[q.id]&&h[q.id].last===0).length;
+  const ex=LS.get(K.exams,[]); const best=ex.filter(e=>e.total>=45).reduce((m,e)=>Math.max(m,e.score),0);
+  const oxN=Object.keys(oxh()).length;
+  const st=settings();
+  let html='<div class="wrap"><h2 class="pg">宅建士 学習</h2><div class="pg-sub">試験：例年10月第3日曜・50問・四肢択一・120分（登録講習修了者は問46〜50免除・110分）</div>';
+  html+='<div class="hero">'
+    +'<div class="kpi"><div class="k-l">取り組んだ問題</div><div class="k-v">'+tried+'<small>/ '+ALLQ.length+'</small></div></div>'
+    +'<div class="kpi"><div class="k-l">要復習</div><div class="k-v" style="color:'+(wrong?'var(--red)':'inherit')+'">'+wrong+'<small>問</small></div></div>'
+    +'<div class="kpi"><div class="k-l">○×に挑戦</div><div class="k-v">'+oxN+'<small>肢</small></div></div>'
+    +'<div class="kpi"><div class="k-l">50問演習の最高点</div><div class="k-v">'+(best||'—')+'<small>/ 50（目標 '+st.pass+'）</small></div></div></div>';
+  html+='<div class="mode-grid">'
+    +mcard('📚','過去問（年度別）', SETS.length? SETS.length+'セット取り込み済み。本試験の時間・問題順で解く' : '購入した過去問を取り込むとここに並びます','past')
+    +mcard('🎯','分野別演習','分野と問題数を選んで、1問ずつ解説つきで解く','drill')
+    +mcard('⭕','○×一問一答','4つの肢を1つずつ○×で。スキマ時間向け','ox')
+    +mcard('⏱','模擬試験','全問題から本試験の配分（14/8/8/20）で出題','mock')
+    +mcard('🔁','復習','間違えた問題・★キープした問題だけを解き直す','review')
+    +mcard('📊','記録','分野別の正答率と演習の履歴','stats')
+    +'</div>';
+  html+='<div class="sec-h">分野別の正答率（直近の解答）</div><div class="fbars">'+FORDER.map(f=>{ const s=fieldStats(f); const r=s.rate; return '<div class="fbar"><span>'+FIELDS[f].icon+' '+FIELDS[f].name+'</span><div class="tr"><div class="fl" style="width:'+(r==null?0:r*100)+'%;background:'+FIELDS[f].color+'"></div></div><span class="v">'+pct(r)+' · '+s.tried+'/'+s.total+'</span></div>'; }).join('')+'</div>';
+  html+='<div class="sec-h">単元から学ぶ</div><div class="pg-sub" style="margin-bottom:0">左の一覧（スマホは「‹ メニュー」）から単元を選ぶと、解説→問題→○× の順に進めます。</div>';
+  html+='</div>';
+  $c().innerHTML=html;
+}
+function mcard(ic,name,desc,view,dis){ return '<button class="mode-card" '+(dis?'disabled':'')+' onclick="go(\''+view+'\')"><div class="mode-ic">'+ic+'</div><div class="mode-name">'+name+'</div><div class="mode-desc">'+desc+'</div></button>'; }
+
+/* ═══════════ 単元 ═══════════ */
+let unitTab='g';
+function renderUnit(uid){
+  const u=UMAP[uid]; if(!u){ go('home'); return; }
+  LS.set(K.last,uid);
+  const qs=ALLQ.filter(q=>q.unit===uid);
+  const oxs=[].concat(...qs.map(stmtsOf));
+  let html='<div class="wrap"><h2 class="pg">'+(u.icon||'')+' '+esc(u.title)+' '+fchip(u.field)+(u.menjo?'<span class="chip gray">免除科目</span>':'')+'</h2>'+(u.sub?'<div class="pg-sub" style="margin-bottom:8px">'+esc(u.sub)+'</div>':'')
+    +'<div class="tabs"><button class="tab'+(unitTab==='g'?' on':'')+'" onclick="unitTab=\'g\';renderUnit(\''+uid+'\')">解説</button><button class="tab'+(unitTab==='q'?' on':'')+'" onclick="unitTab=\'q\';renderUnit(\''+uid+'\')">問題（'+qs.length+'）</button><button class="tab'+(unitTab==='x'?' on':'')+'" onclick="unitTab=\'x\';renderUnit(\''+uid+'\')">○×（'+oxs.length+'）</button></div></div>';
+  if(unitTab==='g'){ html+='<div class="gram">'+(u.gram||'<p>解説は準備中です。</p>')+'</div><div class="qnav"><button class="btn p" onclick="unitTab=\'q\';renderUnit(\''+uid+'\')">問題を解く ›</button></div>'; $c().innerHTML=html; return; }
+  if(unitTab==='q'){ if(!qs.length){ $c().innerHTML=html+'<div class="empty wrap">この単元の問題はまだありません。</div>'; return; }
+    $c().innerHTML=html; startPractice(qs.map(q=>q.id), u.title, {append:true}); return; }
+  if(!oxs.length){ $c().innerHTML=html+'<div class="empty wrap">○×にできる肢がありません。</div>'; return; }
+  $c().innerHTML=html; startOX(shuffle(oxs), u.title+' ○×', {append:true});
+}
+
+/* ═══════════ 練習モード（1問ずつ・即採点） ═══════════ */
+let PR=null;
+function startPractice(ids,title,opt){
+  opt=opt||{};
+  if(!opt.append) setCrumb(title);
+  PR={ ids:ids.slice(), i:0, ok:0, done:[], title, append:!!opt.append, base: opt.append? $c().innerHTML : '' };
+  showPQ();
+}
+function prHost(){ if(PR.append){ let h=document.getElementById('pr-host'); if(!h){ $c().insertAdjacentHTML('beforeend','<div id="pr-host"></div>'); h=document.getElementById('pr-host'); } return h; } return $c(); }
+function qBody(q,state){
+  /* state: {sel, reveal, mode:'practice'|'exam'|'view'} */
+  let h='<div class="qcard"><div class="qmeta">'+fchip(q.field)+(q.unit&&UMAP[q.unit]?'<span class="chip gray">'+esc(UMAP[q.unit].title)+'</span>':'')+'<span class="src">'+esc(srcLabel(q))+'</span></div>';
+  h+='<div class="qq">'+rich(q.stem)+'</div>';
+  if(q.stmts.length){ h+='<div class="stmts">'+q.stmts.map((s,i)=>'<div class="stmt"><span class="sl">'+SL[i]+'</span>'+(state.reveal?'<span class="sj '+(s.ok?'o':'x')+'">'+(s.ok?'○':'×')+'</span>':'')+'<span>'+rich(s.t)+(state.reveal&&s.why?'<div style="font-size:12.5px;color:var(--text-dim);margin-top:2px">'+rich(s.why)+'</div>':'')+'</span></div>').join('')+'</div>'; }
+  h+='<div class="choices">';
+  q.choices.forEach((c,i)=>{
+    let cls='choice';
+    if(state.reveal){ if(i===q.ans) cls+=' ok'; else if(i===state.sel) cls+=' ng'; }
+    else if(i===state.sel) cls+=' sel';
+    const on = state.mode==='practice'? 'answerP('+i+')' : state.mode==='exam'? 'exPick('+i+')' : '';
+    h+='<button class="'+cls+'" '+(state.reveal||state.mode==='view'?'disabled':'')+' onclick="'+on+'"><span class="ck">'+MARK[i]+'</span><span>'+rich(c)+'</span></button>';
+    if(state.reveal && q.why[i]){ const tf = stmtTruth(q,i); h+='<div class="cwhy show">'+(tf==null?'':'<b class="'+(tf?'o':'x')+'">'+(tf?'○ 正しい':'× 誤り')+'</b>　')+rich(q.why[i])+'</div>'; }
+  });
+  h+='</div></div>';
+  if(state.reveal){ const ok=state.sel===q.ans;
+    h+='<div class="fb '+(state.sel==null?'ng':ok?'ok':'ng')+'"><div class="fb-h">'+(state.sel==null?'未解答':ok?'正解':'不正解')+'　正解は <b>'+MARK[q.ans]+'</b></div><div class="fb-body">'+rich(q.exp||'')+'</div></div>'; }
+  return h;
+}
+function isMenjoQ(q){ return (q.src==='imp'&&q.no>=46&&q.no<=50) || !!(q.unit&&UMAP[q.unit]&&UMAP[q.unit].menjo); }
+function stmtTruth(q,i){ if(q.polarity==='correct') return i===q.ans; if(q.polarity==='wrong') return i!==q.ans; return null; }
+function showPQ(sel,reveal){
+  const q=QMAP[PR.ids[PR.i]]; const n=PR.ids.length;
+  let h='<div class="qprog"><div class="qtrack"><div class="qfill" style="width:'+(PR.i/n*100)+'%"></div></div><span class="qlbl">'+(PR.i+1)+' / '+n+(PR.append?'':'　'+esc(PR.title))+'</span></div>';
+  h+=qBody(q,{sel:sel==null?null:sel, reveal:!!reveal, mode:'practice'});
+  h+='<div class="qnav"><button class="keepbtn'+(isKept(q.id)?' on':'')+'" onclick="toggleKeep(\''+q.id+'\',this)">'+(isKept(q.id)?'★ キープ中':'☆ キープ')+'</button><span class="spacer"></span>';
+  if(reveal) h+='<button class="btn p" onclick="nextP()">'+(PR.i+1<n?'次の問題 ›':'結果を見る')+'</button>';
+  else h+='<button class="btn sm" onclick="answerP(null)">わからない</button>';
+  h+='</div>';
+  prHost().innerHTML=h;
+  if(reveal){ const fb=prHost().querySelector('.fb'); if(fb) fb.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+  else if(!PR.append) $c().scrollTop=0;
+}
+function answerP(i){ const q=QMAP[PR.ids[PR.i]]; const ok=i===q.ans; recQ(q.id,ok); if(ok) PR.ok++; PR.done.push({id:q.id,sel:i,ok}); showPQ(i,true); }
+function nextP(){ PR.i++; if(PR.i<PR.ids.length){ showPQ(); return; }
+  const n=PR.ids.length, wrongIds=PR.done.filter(d=>!d.ok).map(d=>d.id);
+  let h='<div class="result-badge '+(PR.ok/n>=0.7?'pass':'fail')+'"><div class="rb-big">'+PR.ok+' / '+n+'</div><div class="rb-sub">'+esc(PR.title)+'　正答率 '+Math.round(PR.ok/n*100)+'%</div></div>';
+  h+='<div class="row" style="margin-bottom:18px">'+(wrongIds.length?'<button class="btn p" onclick="startPractice('+esc(JSON.stringify(wrongIds))+',\'間違えた問題\')">✗ 間違えた '+wrongIds.length+'問を解き直す</button>':'')+'<button class="btn" onclick="startPractice(shuffle('+esc(JSON.stringify(PR.ids))+'),'+esc(JSON.stringify(PR.title))+')">↻ もう一度</button><button class="btn" onclick="go(\'home\')">ホームへ</button></div>';
+  h+=PR.done.map((d,k)=>revItem(QMAP[d.id],d.sel,k+1)).join('');
+  prHost().innerHTML=h; renderSidebar();
+}
+function revItem(q,sel,num){ const ok=sel===q.ans; return '<div class="rev-item '+(ok?'ok':'no')+'" onclick="viewQ(\''+q.id+'\','+(sel==null?'null':sel)+')"><div class="qmeta" style="margin-bottom:0">'+(num?'<b style="font-size:12px">'+num+'</b>':'')+fchip(q.field)+'<span class="src">'+esc(srcLabel(q))+'</span></div><div class="rq">'+esc(String(q.stem).replace(/<[^>]+>/g,''))+'</div><div class="rl">あなた：<span class="'+(ok?'yes':'bad')+'">'+(sel==null?'未解答':MARK[sel])+'</span>　正解：<span class="yes">'+MARK[q.ans]+'</span>　<span style="color:var(--accent)">解説 ›</span></div></div>'; }
+function viewQ(id,sel){ const q=QMAP[id]; openModal(srcLabel(q), qBody(q,{sel:sel,reveal:true,mode:'view'})+'<div class="qnav"><button class="keepbtn'+(isKept(id)?' on':'')+'" onclick="toggleKeep(\''+id+'\',this)">'+(isKept(id)?'★ キープ中':'☆ キープ')+'</button></div>'); }
+
+/* ═══════════ ○× 一問一答 ═══════════ */
+let OX=null;
+function startOX(items,title,opt){ opt=opt||{}; if(!opt.append) setCrumb(title); OX={ items, i:0, ok:0, title, append:!!opt.append, wrong:[] }; showOX(); }
+function oxHost(){ if(OX.append){ let h=document.getElementById('pr-host'); if(!h){ $c().insertAdjacentHTML('beforeend','<div id="pr-host"></div>'); h=document.getElementById('pr-host'); } return h; } return $c(); }
+function showOX(pick){
+  const it=OX.items[OX.i], n=OX.items.length, q=QMAP[it.qid];
+  let h='<div class="qprog"><div class="qtrack"><div class="qfill" style="width:'+(OX.i/n*100)+'%"></div></div><span class="qlbl">'+(OX.i+1)+' / '+n+(OX.append?'':'　'+esc(OX.title))+'</span></div>';
+  h+='<div class="ox-card"><div class="qmeta">'+fchip(q.field)+'<span class="src">'+esc(srcLabel(q))+' 肢'+it.lbl+'</span></div><div class="ox-t">'+rich(it.t)+'</div>';
+  const rev=pick!=null;
+  h+='<div class="ox-btns"><button class="ox-b o'+(rev&&pick===true?' hit':'')+'" '+(rev?'disabled':'')+' onclick="answerOX(true)">○</button><button class="ox-b x'+(rev&&pick===false?' hit':'')+'" '+(rev?'disabled':'')+' onclick="answerOX(false)">×</button></div></div>';
+  if(rev){ const ok=pick===it.ok; h+='<div class="fb '+(ok?'ok':'ng')+'"><div class="fb-h">'+(ok?'正解':'不正解')+'　この肢は <b>'+(it.ok?'○ 正しい':'× 誤り')+'</b></div><div class="fb-body">'+rich(it.why||'（解説なし）')+'</div></div>'
+    +'<div class="qnav"><button class="btn sm" onclick="viewQ(\''+it.qid+'\',null)">元の問題を見る</button><span class="spacer"></span><button class="btn p" onclick="nextOX()">'+(OX.i+1<n?'次へ ›':'結果を見る')+'</button></div>'; }
+  oxHost().innerHTML=h;
+}
+function answerOX(v){ const it=OX.items[OX.i]; const ok=v===it.ok; recOX(it.key,ok); if(ok) OX.ok++; else OX.wrong.push(it); showOX(v); }
+function nextOX(){ OX.i++; if(OX.i<OX.items.length){ showOX(); return; }
+  const n=OX.items.length; window._oxWrong=OX.wrong;
+  oxHost().innerHTML='<div class="result-badge '+(OX.ok/n>=0.8?'pass':'fail')+'"><div class="rb-big">'+OX.ok+' / '+n+'</div><div class="rb-sub">'+esc(OX.title)+'　正答率 '+Math.round(OX.ok/n*100)+'%</div></div><div class="row">'+(OX.wrong.length?'<button class="btn p" onclick="startOX(shuffle(window._oxWrong),\'○× 間違えた肢\')">✗ 間違えた '+OX.wrong.length+'肢をもう一度</button>':'')+'<button class="btn" onclick="go(\'ox\')">○×メニューへ</button></div>';
+}
+function renderOXMenu(){
+  const all=[].concat(...ALLQ.map(stmtsOf)); const h=oxh();
+  const wrong=all.filter(s=>h[s.key]&&h[s.key].last===0);
+  let html='<div class="wrap"><h2 class="pg">⭕ ○×一問一答</h2><div class="pg-sub">4択の各肢を1つずつ○×で判定します。「正しいもの／誤っているものはどれか」型と個数問題の肢が対象です（全 '+all.length+' 肢）。</div>';
+  html+='<div class="sec-h">分野を選ぶ</div><div class="mode-grid">';
+  FORDER.forEach(f=>{ const n=all.filter(s=>QMAP[s.qid].field===f).length; html+='<button class="mode-card" '+(n?'':'disabled')+' onclick="oxStart(\''+f+'\')"><div class="mode-ic">'+FIELDS[f].icon+'</div><div class="mode-name">'+FIELDS[f].name+'</div><div class="mode-desc">'+n+'肢からランダム20</div></button>'; });
+  html+='<button class="mode-card" '+(all.length?'':'disabled')+' onclick="oxStart(\'all\')"><div class="mode-ic">🎲</div><div class="mode-name">全分野ミックス</div><div class="mode-desc">ランダム20肢</div></button>';
+  html+='<button class="mode-card" '+(wrong.length?'':'disabled')+' onclick="oxStart(\'wrong\')"><div class="mode-ic">✗</div><div class="mode-name">直近で間違えた肢</div><div class="mode-desc">'+wrong.length+'肢</div></button></div></div>';
+  $c().innerHTML=html;
+}
+function oxStart(f){ const all=[].concat(...ALLQ.map(stmtsOf)); const h=oxh(); let pool;
+  if(f==='wrong') pool=all.filter(s=>h[s.key]&&h[s.key].last===0); else if(f==='all') pool=all; else pool=all.filter(s=>QMAP[s.qid].field===f);
+  pool=shuffle(pool); if(f!=='wrong') pool=pool.slice(0,20);
+  startOX(pool, f==='wrong'?'○× 間違えた肢':f==='all'?'○× ミックス':'○× '+FIELDS[f].name);
+}
+
+/* ═══════════ 分野別演習 ═══════════ */
+let drillF={kenri:1,gyoho:1,horei:1,zei:1}, drillN=10, drillSrc='all', drillOrder='rand';
+function renderDrill(){
+  const pool=drillPool();
+  let html='<div class="wrap"><h2 class="pg">🎯 分野別演習</h2><div class="pg-sub">分野・出典・問題数を選んで、1問ずつ解説つきで解きます。</div>';
+  html+='<div class="sec-h">分野</div><div class="row">'+FORDER.map(f=>'<label class="ck"><input type="checkbox" '+(drillF[f]?'checked':'')+' onchange="drillF[\''+f+'\']=this.checked?1:0;renderDrill()"> '+FIELDS[f].icon+' '+FIELDS[f].name+'（'+ALLQ.filter(q=>q.field===f).length+'）</label>').join('')+'</div>';
+  html+='<div class="sec-h">出典</div><div class="seg">'+[['all','すべて'],['orig','オリジナル'],['imp','取り込み']].map(s=>'<button class="'+(drillSrc===s[0]?'on':'')+'" onclick="drillSrc=\''+s[0]+'\';renderDrill()">'+s[1]+'</button>').join('')+'</div>';
+  html+='<div class="sec-h">出し方</div><div class="seg">'+[['rand','ランダム'],['new','未解答を優先'],['weak','苦手を優先']].map(s=>'<button class="'+(drillOrder===s[0]?'on':'')+'" onclick="drillOrder=\''+s[0]+'\';renderDrill()">'+s[1]+'</button>').join('')+'</div>';
+  html+='<div class="sec-h">問題数</div><div class="seg">'+[5,10,20,50].map(n=>'<button class="'+(drillN===n?'on':'')+'" onclick="drillN='+n+';renderDrill()">'+n+'問</button>').join('')+'</div>';
+  html+='<div class="qnav"><button class="btn p" '+(pool.length?'':'disabled')+' onclick="drillGo()">はじめる（対象 '+pool.length+'問）</button></div></div>';
+  $c().innerHTML=html;
+}
+function drillPool(){ return ALLQ.filter(q=>drillF[q.field] && (drillSrc==='all'||q.src===drillSrc)); }
+function drillGo(){ const h=hist(); let p=shuffle(drillPool());
+  if(drillOrder==='new') p.sort((a,b)=>(h[a.id]?1:0)-(h[b.id]?1:0));
+  if(drillOrder==='weak'){ const sc=q=>{ const r=h[q.id]; if(!r) return 0.5; return r.last===0?0:(r.c/r.n); }; p.sort((a,b)=>sc(a)-sc(b)); }
+  startPractice(p.slice(0,drillN).map(q=>q.id),'分野別演習'); }
+
+/* ═══════════ 本試験モード（年度別・模試共通） ═══════════ */
+let EX=null, TIMER=null;
+function stopTimer(){ if(TIMER){ clearInterval(TIMER); TIMER=null; } }
+function startExam(ids,title,minutes,opt){
+  opt=opt||{}; setCrumb(title);
+  EX={ ids, title, sel:new Array(ids.length).fill(null), flag:new Array(ids.length).fill(false), i:0, remain:minutes*60, total:minutes*60, start:Date.now(), menjo:!!opt.menjo, setId:opt.setId||null, paused:false };
+  stopTimer(); TIMER=setInterval(()=>{ if(!EX||EX.paused) return; EX.remain--; const t=document.getElementById('ex-timer'); if(t){ t.textContent='⏱ '+fmtTime(EX.remain); t.classList.toggle('warn',EX.remain<=600); } if(EX.remain<=0){ stopTimer(); toast('時間切れです。採点します'); finishExam(); } },1000);
+  showEx();
+}
+function showEx(){
+  const i=EX.i, q=QMAP[EX.ids[i]], n=EX.ids.length, una=EX.sel.filter(v=>v==null).length;
+  let h='<div class="exbar"><span class="timer'+(EX.remain<=600?' warn':'')+'" id="ex-timer">⏱ '+fmtTime(EX.remain)+'</span><b style="font-size:13px">問'+(q.no||i+1)+'</b><span class="qlbl">'+(i+1)+'/'+n+'　未解答 '+una+'</span><span class="spacer" style="flex:1"></span><button class="btn sm" onclick="exPause()">'+(EX.paused?'▶ 再開':'⏸ 一時停止')+'</button><button class="btn sm p" onclick="exConfirm()">採点する</button></div>';
+  if(EX.paused){ $c().innerHTML=h+'<div class="empty wrap">一時停止中です。</div>'; return; }
+  h+='<div class="grid50">'+EX.ids.map((id,k)=>'<button class="gcell'+(EX.sel[k]!=null?' ans':'')+(k===i?' cur':'')+(EX.flag[k]?' flag':'')+'" onclick="exGo('+k+')">'+(QMAP[id].no||k+1)+'</button>').join('')+'</div>';
+  h+=qBody(q,{sel:EX.sel[i],reveal:false,mode:'exam'});
+  h+='<div class="qnav"><button class="btn sm" onclick="exFlag()">'+(EX.flag[i]?'● 見直し解除':'○ 後で見直す')+'</button><span class="spacer"></span><button class="btn" '+(i?'':'disabled')+' onclick="exGo('+(i-1)+')">‹ 前へ</button><button class="btn p" '+(i+1<n?'':'disabled')+' onclick="exGo('+(i+1)+')">次へ ›</button></div>';
+  $c().innerHTML=h;
+}
+function exPick(k){ EX.sel[EX.i]=EX.sel[EX.i]===k?null:k; showEx(); }
+function exGo(k){ EX.i=k; showEx(); $c().scrollTop=0; }
+function exFlag(){ EX.flag[EX.i]=!EX.flag[EX.i]; showEx(); }
+function exPause(){ EX.paused=!EX.paused; showEx(); }
+function exConfirm(){ const una=EX.sel.filter(v=>v==null).length; if(una && !confirm('未解答が '+una+' 問あります。採点しますか？')) return; if(!una && !confirm('採点しますか？')) return; stopTimer(); finishExam(); }
+function finishExam(){
+  const st=settings(); const by={}; EXAM_ORDER.forEach(f=>by[f]={c:0,n:0});
+  let score=0;
+  EX.ids.forEach((id,k)=>{ const q=QMAP[id]; const ok=EX.sel[k]===q.ans; if(EX.sel[k]!=null) recQ(id,ok); if(ok) score++; by[q.field].n++; if(ok) by[q.field].c++; });
+  const bonus=EX.menjo?5:0; const total=EX.ids.length+bonus; score+=bonus;
+  const full=total>=50; const pass=full? score>=st.pass : score/total>=st.pass/50;
+  const used=EX.total-EX.remain;
+  const ex=LS.get(K.exams,[]); ex.unshift({ t:Date.now(), title:EX.title, score, total, by, used, menjo:EX.menjo }); LS.set(K.exams,ex.slice(0,200));
+  window._exRes={ ids:EX.ids, sel:EX.sel };
+  let h='<div class="result-badge '+(pass?'pass':'fail')+'"><div class="rb-big">'+score+' / '+total+'</div><div class="rb-sub">'+esc(EX.title)+'　目標 '+(full?st.pass+'点':Math.round(st.pass/50*100)+'%')+(EX.menjo?'（免除5点を含む）':'')+'　所要 '+fmtTime(used)+'</div></div>';
+  h+='<div class="fbars wrap" style="margin-bottom:18px">'+EXAM_ORDER.filter(f=>by[f].n).map(f=>{ const r=by[f].c/by[f].n; return '<div class="fbar"><span>'+FIELDS[f].icon+' '+FIELDS[f].name+'</span><div class="tr"><div class="fl" style="width:'+r*100+'%;background:'+FIELDS[f].color+'"></div></div><span class="v">'+by[f].c+' / '+by[f].n+'</span></div>'; }).join('')+'</div>';
+  const wrongIds=EX.ids.filter((id,k)=>EX.sel[k]!==QMAP[id].ans);
+  h+='<div class="row" style="margin-bottom:12px">'+(wrongIds.length?'<button class="btn p" onclick="startPractice('+esc(JSON.stringify(wrongIds))+',\'試験の間違い直し\')">✗ 間違えた '+wrongIds.length+'問を解説つきで解き直す</button>':'')+'<button class="btn" onclick="go(\'home\')">ホームへ</button></div>';
+  h+='<div class="grid50">'+EX.ids.map((id,k)=>'<button class="gcell '+(EX.sel[k]==null?'ng':EX.sel[k]===QMAP[id].ans?'ok':'ng')+'" onclick="viewQ(\''+id+'\','+(EX.sel[k]==null?'null':EX.sel[k])+')">'+(QMAP[id].no||k+1)+'</button>').join('')+'</div>';
+  h+=EX.ids.map((id,k)=>revItem(QMAP[id],EX.sel[k],QMAP[id].no||k+1)).join('');
+  EX=null; $c().innerHTML='<div>'+h+'</div>'; $c().scrollTop=0; renderSidebar();
+}
+
+/* ═══════════ 過去問（取り込みセット） ═══════════ */
+function renderPast(){
+  const st=settings();
+  let html='<div class="wrap"><h2 class="pg">📚 過去問（年度別）</h2><div class="pg-sub">取り込んだ過去問のセットです。「本試験」は'+(st.menjo?'問46〜50を免除して110分':'50問・120分')+'で解きます（設定で切り替え）。</div>';
+  if(!SETS.length){ html+='<div class="empty">まだ過去問が取り込まれていません。<br><button class="btn p" style="margin-top:10px" onclick="go(\'import\')">📥 取り込み画面へ</button></div></div>'; $c().innerHTML=html; return; }
+  const h=hist();
+  SETS.slice().sort((a,b)=>String(b.exam||b.name).localeCompare(String(a.exam||a.name))).forEach(s=>{
+    const qs=ALLQ.filter(q=>q.setId===s.id); const tried=qs.filter(q=>h[q.id]).length; const ok=qs.filter(q=>h[q.id]&&h[q.id].last===1).length;
+    const last=LS.get(K.exams,[]).find(e=>e.setId===s.id);
+    html+='<div class="list-item"><div class="li-main"><div class="li-t">'+esc(s.name)+'</div><div class="li-s">'+qs.length+'問　取り組み '+tried+'　直近正解 '+ok+'</div></div><button class="btn sm" onclick="pastPractice(\''+s.id+'\')">練習</button><button class="btn sm p" onclick="pastExam(\''+s.id+'\')">本試験</button></div>';
+  });
+  html+='</div>'; $c().innerHTML=html;
+}
+function setQs(id){ return ALLQ.filter(q=>q.setId===id).sort((a,b)=>(a.no||0)-(b.no||0)); }
+function pastPractice(id){ const s=SETS.find(x=>x.id===id); startPractice(setQs(id).map(q=>q.id), s.name); }
+function pastExam(id){ const s=SETS.find(x=>x.id===id); const st=settings(); let qs=setQs(id);
+  const isFull=qs.length>=50; const menjo=st.menjo&&isFull; if(menjo) qs=qs.filter(q=>!(q.no>=46&&q.no<=50));
+  const min=isFull?(menjo?110:120):Math.max(5,Math.round(qs.length*2.4));
+  startExam(qs.map(q=>q.id), s.name+' 本試験', min, {menjo, setId:id}); }
+
+/* ═══════════ 模擬試験 ═══════════ */
+let mockSrc='all';
+function renderMock(){
+  const st=settings(); const pool=ALLQ.filter(q=>mockSrc==='all'||q.src===mockSrc);
+  const have={}; FORDER.forEach(f=>have[f]=pool.filter(q=>q.field===f).length);
+  let html='<div class="wrap"><h2 class="pg">⏱ 模擬試験</h2><div class="pg-sub">全問題から本試験の配分でランダムに出題し、時間を計って解きます。問題が足りない分野は、ある分だけ出題します。</div>';
+  html+='<div class="sec-h">出典</div><div class="seg">'+[['all','すべて'],['orig','オリジナル'],['imp','取り込み']].map(s=>'<button class="'+(mockSrc===s[0]?'on':'')+'" onclick="mockSrc=\''+s[0]+'\';renderMock()">'+s[1]+'</button>').join('')+'</div>';
+  html+='<div class="sec-h">配分と手持ちの問題数</div><div class="fbars">'+EXAM_ORDER.map(f=>{ const need=(f==='zei'&&st.menjo)?3:FIELDS[f].n; return '<div class="fbar"><span>'+FIELDS[f].icon+' '+FIELDS[f].name+'</span><div class="tr"><div class="fl" style="width:'+Math.min(100,have[f]/need*100)+'%;background:'+FIELDS[f].color+'"></div></div><span class="v">'+Math.min(have[f],need)+' / '+need+'問</span></div>'; }).join('')+'</div>';
+  html+='<div class="sec-h">形式</div><div class="mode-grid">'
+    +'<button class="mode-card" onclick="mockGo(1)"><div class="mode-ic">📝</div><div class="mode-name">フル（'+(st.menjo?'45問・110分':'50問・120分')+'）</div><div class="mode-desc">本試験と同じ配分・時間</div></button>'
+    +'<button class="mode-card" onclick="mockGo(0.5)"><div class="mode-ic">⏳</div><div class="mode-name">ハーフ（25問・60分）</div><div class="mode-desc">平日の2時間に収まる長さ</div></button>'
+    +'<button class="mode-card" onclick="mockGo(\'gyoho\')"><div class="mode-ic">🏢</div><div class="mode-name">宅建業法だけ（20問・45分）</div><div class="mode-desc">得点源の業法を満点狙いで</div></button></div></div>';
+  $c().innerHTML=html;
+}
+function mockGo(r){
+  const st=settings(); const pool=ALLQ.filter(q=>mockSrc==='all'||q.src===mockSrc); const h=hist();
+  const pick=(f,n)=>{ const p=shuffle(pool.filter(q=>q.field===f && !(st.menjo&&r===1&&isMenjoQ(q)))); p.sort((a,b)=>(h[a.id]?1:0)-(h[b.id]?1:0)); return p.slice(0,n); };
+  let ids=[], min;
+  if(r==='gyoho'){ ids=pick('gyoho',20); min=45; }
+  else { EXAM_ORDER.forEach(f=>{ let need=FIELDS[f].n; if(f==='zei'&&st.menjo&&r===1) need=3; ids=ids.concat(pick(f,Math.round(need*r))); }); min=r===1?(st.menjo?110:120):60; }
+  if(!ids.length){ toast('問題がありません',true); return; }
+  const scale=ids.length/(r==='gyoho'?20:r===1?(st.menjo?45:50):25); min=Math.max(5,Math.round(min*Math.min(1,scale)));
+  startExam(ids.map(q=>q.id), r==='gyoho'?'模試（宅建業法）':r===1?'模擬試験（フル）':'模擬試験（ハーフ）', min, {menjo: r===1&&st.menjo&&ids.length>=45});
+}
+
+/* ═══════════ 復習 ═══════════ */
+function renderReview(){
+  const h=hist(), k=keeps();
+  const wrong=ALLQ.filter(q=>h[q.id]&&h[q.id].last===0);
+  const kept=ALLQ.filter(q=>k[q.id]);
+  const weak=ALLQ.filter(q=>h[q.id]&&h[q.id].n>=2&&h[q.id].c/h[q.id].n<0.6);
+  let html='<div class="wrap"><h2 class="pg">🔁 復習</h2><div class="pg-sub">「間違えた問題」は直近の解答が不正解のもの。正解すると自動でリストから外れます。</div><div class="mode-grid">'
+    +'<button class="mode-card" '+(wrong.length?'':'disabled')+' onclick="startPractice(shuffle(window._rv.w),\'間違えた問題\')"><div class="mode-ic">✗</div><div class="mode-name">間違えた問題</div><div class="mode-desc">'+wrong.length+'問</div></button>'
+    +'<button class="mode-card" '+(kept.length?'':'disabled')+' onclick="startPractice(shuffle(window._rv.k),\'★キープ\')"><div class="mode-ic">★</div><div class="mode-name">キープした問題</div><div class="mode-desc">'+kept.length+'問</div></button>'
+    +'<button class="mode-card" '+(weak.length?'':'disabled')+' onclick="startPractice(shuffle(window._rv.p),\'苦手な問題\')"><div class="mode-ic">🧩</div><div class="mode-name">苦手な問題</div><div class="mode-desc">2回以上解いて正答率60%未満：'+weak.length+'問</div></button></div>';
+  window._rv={ w:wrong.map(q=>q.id), k:kept.map(q=>q.id), p:weak.map(q=>q.id) };
+  if(wrong.length){ html+='<div class="sec-h">間違えた問題の一覧</div>'+wrong.map(q=>revItem(q,null)).join(''); }
+  html+='</div>'; $c().innerHTML=html;
+}
+
+/* ═══════════ 記録 ═══════════ */
+function renderStats(){
+  const ex=LS.get(K.exams,[]); const h=hist(); const o=oxh();
+  let html='<div class="wrap"><h2 class="pg">📊 記録</h2><div class="pg-sub">解答数 '+Object.values(h).reduce((s,r)=>s+r.n,0)+' 回・○× '+Object.values(o).reduce((s,r)=>s+r.n,0)+' 回</div>';
+  html+='<div class="sec-h">分野別（直近の解答の正答率）</div><div class="fbars">'+FORDER.map(f=>{ const s=fieldStats(f); return '<div class="fbar"><span>'+FIELDS[f].icon+' '+FIELDS[f].name+'</span><div class="tr"><div class="fl" style="width:'+(s.rate==null?0:s.rate*100)+'%;background:'+FIELDS[f].color+'"></div></div><span class="v">'+pct(s.rate)+'</span></div>'; }).join('')+'</div>';
+  html+='<div class="sec-h">単元別</div><div class="fbars">'+UNITS_.map(u=>{ const s=unitStats(u.id); const r=s.tried?s.ok/s.tried:null; return '<div class="fbar" style="cursor:pointer" onclick="go(\'unit\',\''+u.id+'\')"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(u.icon||'')+' '+esc(u.title)+'</span><div class="tr"><div class="fl" style="width:'+(r==null?0:r*100)+'%;background:'+FIELDS[u.field].color+'"></div></div><span class="v">'+s.ok+'/'+s.total+'</span></div>'; }).join('')+'</div>';
+  html+='<div class="sec-h">試験・模試の履歴</div>';
+  if(!ex.length) html+='<div class="empty">まだ記録がありません。</div>';
+  else html+='<div class="tblwrap"><table class="hist"><thead><tr><th>日時</th><th>内容</th><th>得点</th>'+EXAM_ORDER.map(f=>'<th>'+FIELDS[f].name.slice(0,2)+'</th>').join('')+'<th>時間</th></tr></thead><tbody>'+ex.slice(0,50).map(e=>'<tr><td>'+fmtDate(e.t)+'</td><td>'+esc(e.title)+'</td><td><b>'+e.score+'</b>/'+e.total+'</td>'+EXAM_ORDER.map(f=>'<td>'+(e.by[f]&&e.by[f].n?e.by[f].c+'/'+e.by[f].n:'—')+'</td>').join('')+'<td>'+fmtTime(e.used)+'</td></tr>').join('')+'</tbody></table></div>';
+  html+='</div>'; $c().innerHTML=html;
+}
+
+/* ═══════════ 取り込み ═══════════ */
+const TEMPLATE={
+  set:{ name:'令和X年度 本試験', exam:'RX' },
+  questions:[
+    { no:1, field:'kenri', unit:'ishi', kind:'single', polarity:'wrong',
+      stem:'意思表示に関する次の記述のうち、民法の規定及び判例によれば、誤っているものはどれか。',
+      choices:['肢1の文','肢2の文','肢3の文','肢4の文'], answer:3,
+      why:['肢1の解説','肢2の解説','肢3の解説（これが誤り）','肢4の解説'], exp:'全体の解説（任意）' },
+    { no:30, field:'gyoho', kind:'count',
+      stem:'次の記述のうち、宅地建物取引業法の規定に違反するものはいくつあるか。',
+      stmts:[ {t:'アの文', ok:true, why:'解説'}, {t:'イの文', ok:false, why:'解説'}, {t:'ウの文', ok:true, why:'解説'}, {t:'エの文', ok:false, why:'解説'} ],
+      choices:['一つ','二つ','三つ','四つ'], answer:2, exp:'' }
+  ]
+};
+const CONVERT_PROMPT=`次の宅建試験の問題（画像・テキスト）を、下のJSON形式に変換してください。出力はJSONだけにしてください。
+
+形式：
+{"set":{"name":"令和○年度 本試験","exam":"R○"},"questions":[ 問題オブジェクト, ... ]}
+
+問題オブジェクトのキー：
+- no：問題番号（1〜50）
+- field：分野。kenri（権利関係 問1〜14）／horei（法令上の制限 問15〜22）／zei（税・価格・免除科目 問23〜25, 46〜50）／gyoho（宅建業法 問26〜45）
+- unit：単元ID（わかれば。下の一覧から選ぶ。わからなければ省略）
+- kind："single"（通常の4択）／"count"（個数問題・組合せ問題）
+- polarity：「正しいものはどれか」なら "correct"、「誤っているものはどれか」なら "wrong"、それ以外（計算など）は省略
+- stem：問題文（柱書）
+- stmts：個数・組合せ問題のときだけ。[{"t":"アの文","ok":true/false,"why":"理由"}, ...]
+- choices：選択肢4つの文（個数問題なら ["一つ","二つ","三つ","四つ"]）
+- answer：正解の番号（1〜4）
+- why：各選択肢の解説4つ（○×の理由と根拠条文・判例のポイントを1〜2文で）
+- exp：全体の解説（任意）
+
+単元IDの一覧：
+${(window.UNITS||[]).map(u=>u.id+'＝'+u.title).join('、')}`;
+
+function renderImport(){
+  let html='<div class="wrap"><h2 class="pg">📥 問題の取り込み</h2><div class="pg-sub">購入した過去問などをJSONで取り込みます。取り込んだ問題は<b>この端末のブラウザの中だけ</b>に保存され、GitHubには載りません。</div>';
+  html+='<div class="nbox">おすすめの流れ：問題集のページを撮影 →「変換プロンプトをコピー」して画像と一緒にClaude（Sonnetで十分）に渡す → 返ってきたJSONをここに貼る。1回で5〜10問ずつが安定します。同じセット名で取り込むと、そのセットに追加（問題番号が同じものは上書き）されます。</div>';
+  html+='<div class="row" style="margin:14px 0 10px"><button class="btn sm" onclick="copyText(CONVERT_PROMPT,\'変換プロンプトをコピーしました\')">📋 変換プロンプトをコピー</button><button class="btn sm" onclick="document.getElementById(\'imp-ta\').value=JSON.stringify(TEMPLATE,null,2)">📄 見本を表示</button><label class="btn sm" style="cursor:pointer">📂 ファイルから<input type="file" accept=".json,application/json,text/plain" style="display:none" onchange="impFile(this)"></label></div>';
+  html+='<textarea class="imp" id="imp-ta" placeholder="ここにJSONを貼り付け"></textarea><div class="row" style="margin-top:10px"><button class="btn p" onclick="doImport()">取り込む</button></div><div class="imp-msg" id="imp-msg"></div>';
+  html+='<div class="sec-h">取り込み済みのセット</div>';
+  if(!SETS.length) html+='<div class="empty">まだありません。</div>';
+  SETS.forEach(s=>{ html+='<div class="list-item"><div class="li-main"><div class="li-t">'+esc(s.name)+'</div><div class="li-s">'+s.questions.length+'問　'+fmtDate(s.t||0)+'</div></div><button class="btn sm" onclick="exportSet(\''+s.id+'\')">書き出し</button><button class="btn sm danger" onclick="delSet(\''+s.id+'\')">削除</button></div>'; });
+  html+='</div>'; $c().innerHTML=html;
+}
+function copyText(t,msg){ (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast(msg)).catch(()=>{ openModal('コピー用（長押しで全選択）','<textarea class="imp" style="min-height:320px">'+esc(t)+'</textarea>'); }); }
+function impFile(inp){ const f=inp.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ document.getElementById('imp-ta').value=r.result; }; r.readAsText(f); }
+function validateQ(q,idx){
+  const e=[]; const w='問'+(q.no||'?')+'（'+(idx+1)+'件目）';
+  if(!q.stem) e.push(w+'：stem（問題文）がありません');
+  if(!Array.isArray(q.choices)||q.choices.length!==4) e.push(w+'：choices は4つ必要です');
+  if(!(q.answer>=1&&q.answer<=4)) e.push(w+'：answer は1〜4の数字にしてください');
+  if(q.field&&!FIELDS[q.field]) e.push(w+'：field が不明です（kenri/horei/zei/gyoho）');
+  if(q.unit&&!UMAP[q.unit]) e.push(w+'：unit「'+q.unit+'」は存在しないので無視します（警告）');
+  if(q.stmts&&!Array.isArray(q.stmts)) e.push(w+'：stmts は配列にしてください');
+  return e;
+}
+function doImport(){
+  const msg=document.getElementById('imp-msg'); let raw=document.getElementById('imp-ta').value.trim();
+  raw=raw.replace(/^```(?:json)?/,'').replace(/```$/,'').trim();
+  let d; try{ d=JSON.parse(raw); }catch(err){ msg.className='imp-msg err'; msg.textContent='JSONとして読めませんでした：'+err.message; return; }
+  if(Array.isArray(d)) d={ set:{name:'取り込み '+new Date().toLocaleDateString()}, questions:d };
+  if(!d.questions||!d.questions.length){ msg.className='imp-msg err'; msg.textContent='questions が見つかりません'; return; }
+  const errs=[]; d.questions.forEach((q,i)=>errs.push(...validateQ(q,i)));
+  const fatal=errs.filter(x=>!x.includes('警告'));
+  if(fatal.length){ msg.className='imp-msg err'; msg.textContent='取り込めませんでした：\n'+errs.join('\n'); return; }
+  const name=(d.set&&d.set.name)||'取り込み';
+  const sets=loadImports(); let s=sets.find(x=>x.name===name);
+  if(!s){ s={ id:'s'+Date.now().toString(36), name, exam:d.set&&d.set.exam||'', t:Date.now(), questions:[] }; sets.push(s); }
+  let add=0, rep=0;
+  d.questions.forEach((q,i)=>{ if(q.unit&&!UMAP[q.unit]) delete q.unit; const no=q.no; const j=no?s.questions.findIndex(x=>x.no===no):-1;
+    q.id=s.id+'_'+(no||('x'+Date.now().toString(36)+i));
+    if(j>=0){ q.id=s.questions[j].id; s.questions[j]=q; rep++; } else { s.questions.push(q); add++; } });
+  s.questions.sort((a,b)=>(a.no||99)-(b.no||99)); s.t=Date.now();
+  if(!LS.set(K.imports,sets)) return;
+  rebuild(); renderImport();
+  const m=document.getElementById('imp-msg'); m.className='imp-msg ok'; m.textContent='「'+name+'」に 追加 '+add+'問・上書き '+rep+'問（合計 '+s.questions.length+'問）'+(errs.length?'\n'+errs.join('\n'):'');
+}
+function delSet(id){ const s=SETS.find(x=>x.id===id); if(!confirm('「'+s.name+'」を削除しますか？（解答記録は残ります）')) return; LS.set(K.imports,loadImports().filter(x=>x.id!==id)); rebuild(); renderImport(); toast('削除しました'); }
+function download(name,obj){ const b=new Blob([JSON.stringify(obj,null,1)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500); }
+function exportSet(id){ const s=SETS.find(x=>x.id===id); download('keystone-'+s.name+'.json',{ set:{name:s.name,exam:s.exam}, questions:s.questions.map(q=>{ const o=Object.assign({},q); delete o.id; return o; }) }); }
+
+/* ═══════════ 設定・バックアップ ═══════════ */
+function renderSettings(){
+  const st=settings();
+  let html='<div class="wrap"><h2 class="pg">⚙︎ 設定・バックアップ</h2><div class="pg-sub">KEYSTONE '+VERSION+'　オリジナル問題 '+(window.ORIG_Q||[]).length+'問・単元 '+UNITS_.length+'</div>';
+  html+='<div class="sec-h">試験の設定</div><div class="row"><label class="ck">目標点 <input class="num" type="number" min="25" max="50" value="'+st.pass+'" onchange="saveSet({pass:+this.value})"> 点 / 50</label></div>';
+  html+='<div class="row" style="margin-top:10px"><label class="ck"><input type="checkbox" '+(st.menjo?'checked':'')+' onchange="saveSet({menjo:this.checked})"> 登録講習修了者（5問免除）として解く</label></div>';
+  html+='<div class="pg-sub" style="margin-top:6px">合格点は年度ごとに変わります（近年はおおむね30点台の中盤〜後半）。余裕を持った目標にしておくのがおすすめです。</div>';
+  html+='<div class="sec-h">バックアップ</div><div class="wbox">iPadのSafariは、しばらく開かないサイトの保存データを消すことがあります。<b>ホーム画面に追加</b>して使い、ときどきバックアップを書き出してください（取り込んだ問題も含まれます）。</div>';
+  html+='<div class="row"><button class="btn p" onclick="backup()">⬇ すべて書き出す</button><label class="btn" style="cursor:pointer">⬆ バックアップから戻す<input type="file" accept=".json" style="display:none" onchange="restore(this)"></label></div>';
+  html+='<div class="sec-h">リセット</div><div class="row"><button class="btn danger" onclick="resetRec()">解答記録を消す</button><button class="btn danger" onclick="resetAll()">取り込み問題も含めてすべて消す</button></div></div>';
+  $c().innerHTML=html;
+}
+function saveSet(p){ LS.set(K.set,Object.assign(settings(),p)); toast('保存しました'); }
+function backup(){ const o={ app:'keystone', v:VERSION, at:new Date().toISOString() }; Object.values(K).forEach(k=>o[k]=LS.get(k,null)); download('keystone-backup-'+new Date().toISOString().slice(0,10)+'.json',o); }
+function restore(inp){ const f=inp.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ try{ const o=JSON.parse(r.result); if(o.app!=='keystone') throw new Error('KEYSTONEのバックアップではありません'); if(!confirm('現在のデータを上書きして戻しますか？')) return; Object.values(K).forEach(k=>{ if(o[k]!=null) LS.set(k,o[k]); }); rebuild(); go('home'); toast('戻しました'); }catch(e){ toast(e.message,true); } }; r.readAsText(f); }
+function resetRec(){ if(!confirm('解答・○×・試験の記録とキープを消します。よろしいですか？')) return; [K.hist,K.ox,K.keep,K.exams].forEach(k=>localStorage.removeItem(k)); go('home'); toast('記録を消しました'); }
+function resetAll(){ if(!confirm('取り込んだ問題も含め、すべて消します。よろしいですか？')) return; Object.values(K).forEach(k=>localStorage.removeItem(k)); rebuild(); go('home'); toast('すべて消しました'); }
+
+/* ═══════════ 起動 ═══════════ */
+rebuild();
+go('home');
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+</script>
+</body>
+</html>
