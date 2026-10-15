@@ -290,6 +290,25 @@ label.ck{ display:inline-flex; align-items:center; gap:6px; font-size:13px; curs
 .ei-pass .fl{ height:100%; background:var(--accent); border-radius:6px; }
 .ei-pass .pt{ font-weight:700; color:var(--text); text-align:right; }
 @media(max-width:560px){ .ei-row{ flex-direction:column; gap:0; } .ei-row .k{ flex:none; } .ei-pass{ grid-template-columns:84px 1fr 54px; } }
+
+/* フリーメモボード */
+#memo-fab{ position:fixed; right:16px; bottom:84px; z-index:150; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; width:56px; height:56px; border-radius:50%; border:none; background:#34508f; color:#fff; font-size:19px; cursor:pointer; box-shadow:0 6px 20px rgba(52,80,143,.36); -webkit-tap-highlight-color:transparent; transition:transform .12s; }
+#memo-fab span{ font-size:9px; letter-spacing:.04em; }
+#memo-fab:active{ transform:scale(.94); }
+#memo-fab.on{ background:#0f7d70; box-shadow:0 6px 20px rgba(15,125,112,.4); }
+#memowrap{ display:none; position:fixed; z-index:190; background:#fff; border:1px solid #cfd6e4; border-radius:10px; box-shadow:0 12px 34px rgba(0,0,0,.28); overflow:hidden; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; font-family:inherit; }
+#memowrap.show{ display:block; }
+#memo-bar{ display:flex; align-items:center; justify-content:space-between; gap:6px; padding:5px 8px; background:#f1f3f9; border-bottom:1px solid #dfe4ef; cursor:move; touch-action:none; }
+#memo-bar .mt{ font-size:11px; color:#5a6478; font-weight:700; letter-spacing:.04em; }
+.memo-sizes{ display:flex; gap:3px; }
+.memo-sz,.memo-x{ min-width:30px; height:26px; padding:0 7px; border:none; border-radius:5px; background:#dfe4ef; color:#44506a; font-family:inherit; font-size:12px; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.memo-sz.on{ background:#34508f; color:#fff; font-weight:700; }
+#memo-tools{ display:flex; align-items:center; gap:6px; padding:5px 8px; border-bottom:1px solid #eceff6; background:#fafbfe; flex-wrap:wrap; }
+.memo-pen{ width:28px; height:28px; border-radius:50%; border:3px solid #fff; box-shadow:0 0 0 1.5px #b8c0d2; cursor:pointer; padding:0; -webkit-tap-highlight-color:transparent; }
+.memo-pen.on{ box-shadow:0 0 0 3px #34508f; }
+.memo-tb{ height:28px; padding:0 9px; border:1px solid #cfd6e4; border-radius:6px; background:#fff; color:#44506a; font-family:inherit; font-size:12px; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.memo-tb.on{ background:#34508f; color:#fff; border-color:#34508f; }
+#memo-canvas{ display:block; touch-action:none; cursor:crosshair; background-color:#fffef9; background-image:linear-gradient(#eef0f6 1px,transparent 1px),linear-gradient(90deg,#eef0f6 1px,transparent 1px); background-size:24px 24px; }
 .glo-rel{ margin-top:10px; font-size:12.5px; color:var(--text-muted); }
 #toast{ position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--hdr-bg); color:var(--hdr-text); padding:11px 20px; border-radius:8px; font-size:13px; opacity:0; pointer-events:none; transition:all .25s; z-index:300; box-shadow:0 6px 24px rgba(0,0,0,.18); max-width:90vw; }
 #toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
@@ -328,6 +347,21 @@ label.ck{ display:inline-flex; align-items:center; gap:6px; font-size:13px; curs
     <div class="modal-head"><div class="modal-title" id="modal-title">—</div><button class="modal-close" onclick="closeModal()" aria-label="閉じる">✕</button></div>
     <div class="modal-body" id="modal-body"></div>
   </div>
+</div>
+<button id="memo-fab" onclick="toggleMemo()" title="フリーメモ（手書き）">📝<span>メモ</span></button>
+<div id="memowrap" aria-label="フリーメモボード">
+  <div id="memo-bar"><span class="mt">📝 メモ</span>
+    <span class="memo-sizes"><button class="memo-sz" data-sz="s" onclick="memoSize('s')">小</button><button class="memo-sz on" data-sz="m" onclick="memoSize('m')">中</button><button class="memo-sz" data-sz="l" onclick="memoSize('l')">大</button></span>
+    <button class="memo-x" onclick="toggleMemo()" title="しまう">×</button></div>
+  <div id="memo-tools">
+    <button class="memo-pen on" data-c="#1a1a1a" style="background:#1a1a1a" onclick="memoTool('#1a1a1a',this)" aria-label="黒"></button>
+    <button class="memo-pen" data-c="#d93025" style="background:#d93025" onclick="memoTool('#d93025',this)" aria-label="赤"></button>
+    <button class="memo-pen" data-c="#1a56db" style="background:#1a56db" onclick="memoTool('#1a56db',this)" aria-label="青"></button>
+    <button class="memo-tb" id="memo-er" onclick="memoTool('erase',this)">消しゴム</button>
+    <button class="memo-tb" onclick="memoUndo()">↶ 戻す</button>
+    <button class="memo-tb" onclick="memoClear()">全消し</button>
+  </div>
+  <canvas id="memo-canvas"></canvas>
 </div>
 <div id="glo" onclick="if(event.target===this)this.classList.remove('show')">
   <div class="glo-box" role="dialog" aria-modal="true"><div class="glo-head"><div class="glo-t" id="glo-t"></div><button class="modal-close" onclick="document.getElementById('glo').classList.remove('show')" aria-label="閉じる">✕</button></div><div class="glo-b" id="glo-b"></div></div>
@@ -2404,7 +2438,7 @@ window.ORIG_Q = [
    ・コンテンツ：data/units.js（UNITS）・data/questions.js（ORIG_Q）
    ・取り込んだ過去問：localStorage（GitHubには載らない）
    ═══════════════════════════════════════════════════════════ */
-const VERSION='2026-10-16c';
+const VERSION='2026-10-16d';
 const LS={ get(k,d){ try{ const v=JSON.parse(localStorage.getItem(k)); return v==null?d:v; }catch(e){ return d; } },
            set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ toast('保存できませんでした（容量不足の可能性）',true); return false; } } };
 const K={ hist:'ks_hist', ox:'ks_ox', keep:'ks_keep', exams:'ks_exams', imports:'ks_imports', set:'ks_set', last:'ks_last', pass:'ks_pass' };
@@ -2545,6 +2579,58 @@ function renderSidebar(){
   document.getElementById('sb-list').innerHTML=h;
 }
 
+
+
+/* ═══════════ フリーメモボード ═══════════ */
+(function(){
+  const LW=600, LH=450;                       // 論理キャンバス（座標はこの比率で保存し、表示サイズに合わせて拡縮）
+  const SIZES={ s:300, m:420, l:620 };
+  let strokes=[], cur=null, tool='#1a1a1a', szKey='m', penSeen=false, drag=null;
+  try{ strokes=JSON.parse(localStorage.getItem('ks_memo')||'[]')||[]; }catch(e){ strokes=[]; }
+  try{ const k=localStorage.getItem('ks_memo_sz'); if(SIZES[k]) szKey=k; }catch(e){}
+  const $=id=>document.getElementById(id);
+  function save(){ try{ localStorage.setItem('ks_memo',JSON.stringify(strokes)); }catch(e){} }
+  function cssW(){ const mh=window.innerHeight-130; return Math.max(200, Math.min(SIZES[szKey], window.innerWidth-16, mh*LW/LH)); }
+  function layout(){
+    const cv=$('memo-canvas'), w=cssW(), h=w*LH/LW, dpr=window.devicePixelRatio||1;
+    cv.style.width=w+'px'; cv.style.height=h+'px'; cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr);
+    $('memowrap').style.width=w+'px'; redraw(); clamp();
+  }
+  function drawStroke(g,st,k){
+    if(!st.p.length) return;
+    g.save(); g.lineCap='round'; g.lineJoin='round';
+    g.globalCompositeOperation= st.c==='erase'? 'destination-out':'source-over';
+    g.strokeStyle= st.c==='erase'? '#000': st.c; g.lineWidth=(st.c==='erase'? 18 : 2.6)*k;
+    g.beginPath(); g.moveTo(st.p[0][0]*k, st.p[0][1]*k);
+    if(st.p.length===1) g.lineTo(st.p[0][0]*k+0.01, st.p[0][1]*k);
+    for(let i=1;i<st.p.length;i++) g.lineTo(st.p[i][0]*k, st.p[i][1]*k);
+    g.stroke(); g.restore();
+  }
+  function redraw(){ const cv=$('memo-canvas'), g=cv.getContext('2d'); g.clearRect(0,0,cv.width,cv.height); const k=cv.width/LW; strokes.forEach(st=>drawStroke(g,st,k)); if(cur) drawStroke(g,cur,k); }
+  function pos(e){ const cv=$('memo-canvas'), r=cv.getBoundingClientRect(); return [ +(((e.clientX-r.left)/r.width)*LW).toFixed(1), +(((e.clientY-r.top)/r.height)*LH).toFixed(1) ]; }
+  function clamp(){ const w=$('memowrap'); if(!w.classList.contains('show')) return; const r=w.getBoundingClientRect();
+    w.style.left=Math.min(Math.max(4,r.left),Math.max(4,window.innerWidth-r.width-4))+'px'; w.style.top=Math.min(Math.max(4,r.top),Math.max(4,window.innerHeight-r.height-4))+'px'; }
+  window.toggleMemo=function(){ const w=$('memowrap'); const on=!w.classList.contains('show'); w.classList.toggle('show',on); $('memo-fab').classList.toggle('on',on);
+    if(on){ layout(); if(!w.dataset.placed){ const r=w.getBoundingClientRect(); w.style.left=Math.max(4,window.innerWidth-r.width-16)+'px'; w.style.top=Math.max(4,window.innerHeight-r.height-150)+'px'; w.dataset.placed='1'; clamp(); } } };
+  window.memoSize=function(k){ szKey=k; try{ localStorage.setItem('ks_memo_sz',k); }catch(e){} document.querySelectorAll('.memo-sz').forEach(b=>b.classList.toggle('on',b.dataset.sz===k)); layout(); };
+  window.memoTool=function(t,btn){ tool=t; document.querySelectorAll('.memo-pen').forEach(b=>b.classList.remove('on')); $('memo-er').classList.remove('on'); btn.classList.add('on'); };
+  window.memoUndo=function(){ strokes.pop(); save(); redraw(); };
+  window.memoClear=function(){ if(!strokes.length) return; if(!confirm('メモを全部消しますか？')) return; strokes=[]; save(); redraw(); };
+  document.addEventListener('DOMContentLoaded',function(){
+    const cv=$('memo-canvas'); if(!cv) return;
+    document.querySelectorAll('.memo-sz').forEach(b=>b.classList.toggle('on',b.dataset.sz===szKey));
+    cv.addEventListener('pointerdown',e=>{ if(e.pointerType==='pen') penSeen=true; if(e.pointerType==='touch'&&penSeen) return; if(e.pointerType==='mouse'&&e.button!==0) return;
+      cur={c:tool,p:[pos(e)]}; try{ cv.setPointerCapture(e.pointerId); }catch(x){} redraw(); e.preventDefault(); });
+    cv.addEventListener('pointermove',e=>{ if(!cur) return; const evs=e.getCoalescedEvents? e.getCoalescedEvents():[e]; (evs.length?evs:[e]).forEach(ev=>cur.p.push(pos(ev))); redraw(); e.preventDefault(); });
+    const end=e=>{ if(!cur) return; strokes.push(cur); cur=null; save(); redraw(); };
+    cv.addEventListener('pointerup',end); cv.addEventListener('pointercancel',end);
+    const bar=$('memo-bar');
+    bar.addEventListener('pointerdown',e=>{ if(e.target.closest('button')) return; const w=$('memowrap'), r=w.getBoundingClientRect(); drag={dx:e.clientX-r.left,dy:e.clientY-r.top}; try{ bar.setPointerCapture(e.pointerId); }catch(x){} e.preventDefault(); });
+    bar.addEventListener('pointermove',e=>{ if(!drag) return; const w=$('memowrap'); w.style.left=(e.clientX-drag.dx)+'px'; w.style.top=(e.clientY-drag.dy)+'px'; });
+    const up=()=>{ if(drag){ drag=null; clamp(); } }; bar.addEventListener('pointerup',up); bar.addEventListener('pointercancel',up);
+    window.addEventListener('resize',()=>{ if($('memowrap').classList.contains('show')) layout(); });
+  });
+})();
 
 /* ═══════════ 試験概要 ═══════════ */
 function renderInfo(){
