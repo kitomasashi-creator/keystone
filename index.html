@@ -2404,7 +2404,7 @@ window.ORIG_Q = [
    ・コンテンツ：data/units.js（UNITS）・data/questions.js（ORIG_Q）
    ・取り込んだ過去問：localStorage（GitHubには載らない）
    ═══════════════════════════════════════════════════════════ */
-const VERSION='2026-10-16a';
+const VERSION='2026-10-16c';
 const LS={ get(k,d){ try{ const v=JSON.parse(localStorage.getItem(k)); return v==null?d:v; }catch(e){ return d; } },
            set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ toast('保存できませんでした（容量不足の可能性）',true); return false; } } };
 const K={ hist:'ks_hist', ox:'ks_ox', keep:'ks_keep', exams:'ks_exams', imports:'ks_imports', set:'ks_set', last:'ks_last', pass:'ks_pass' };
@@ -2475,7 +2475,7 @@ function gl(html){ if(!GL_RE||!html) return html; const seen=new Set();
 function glo(term){ const e=(window.GLOSSARY||{})[term]; if(!e) return;
   const f=FIELDS[e.f]?fchip(e.f):'';
   document.getElementById('glo-t').innerHTML=esc(term)+' '+f;
-  document.getElementById('glo-b').innerHTML=(e.p?'<div class="glo-p"><b>💡 わかりやすく言うと</b><br>'+esc(e.p)+'</div>':'')+'<p class="glo-d">'+(e.p?'<b class="glo-lb">くわしく</b><br>':'')+esc(e.d)+'</p>'+(e.t?'<div class="glo-t"><b>🧩 たとえば（こういう状況）</b><br>'+esc(e.t.replace(/^たとえば、/,'たとえば、'))+'</div>':'')+((e.rel&&e.rel.length)?'<div class="glo-rel">関連：'+e.rel.map(r=>'<span class="gl" data-g="'+esc(r)+'">'+esc(r)+'</span>').join('　')+'</div>':'');
+  document.getElementById('glo-b').innerHTML='<p class="glo-d">'+esc(e.d)+'</p>'+(e.p?plainBox(e.p,'わかりやすく言うと'):'')+(e.t?tatoeBox(e.t):'')+((e.rel&&e.rel.length)?'<div class="glo-rel">関連：'+e.rel.map(r=>'<span class="gl" data-g="'+esc(r)+'">'+esc(r)+'</span>').join('　')+'</div>':'');
   document.getElementById('glo').classList.add('show'); }
 document.addEventListener('click',ev=>{ const s=ev.target.closest&&ev.target.closest('.gl'); if(s){ ev.preventDefault(); ev.stopPropagation(); glo(s.dataset.g); } },true);
 
@@ -2743,6 +2743,7 @@ function renderOXMenu(){
   const all=allOX(); const h=oxh();
   const wrong=all.filter(s=>h[s.key]&&h[s.key].last===0);
   let html='<div class="wrap"><h2 class="pg">⭕ ○×一問一答</h2><div class="pg-sub">1文ずつ○×で判定します。過去問・オリジナル問題の各肢に、オリジナルの一問一答を加えた全 '+all.length+' 問です。</div>';
+  if(window.PAST_ENC && !PAST_PACKS.length) html+='<div class="hbox" style="margin-bottom:14px">🔒 過去問の肢（約2,400肢）は<b>まだ解除されていません</b>。<button class="btn sm" onclick="go(\'past\')">過去問でパスワードを入れる</button> と、一問一答にも加わります。</div>';
   html+='<div class="sec-h">分野を選ぶ</div><div class="mode-grid">';
   FORDER.forEach(f=>{ const n=all.filter(s=>oxField(s)===f).length; html+='<button class="mode-card" '+(n?'':'disabled')+' onclick="oxStart(\''+f+'\')"><div class="mode-ic">'+FIELDS[f].icon+'</div><div class="mode-name">'+FIELDS[f].name+'</div><div class="mode-desc">'+n+'肢からランダム20</div></button>'; });
   html+='<button class="mode-card" '+(all.length?'':'disabled')+' onclick="oxStart(\'all\')"><div class="mode-ic">🎲</div><div class="mode-name">全分野ミックス</div><div class="mode-desc">ランダム20肢</div></button>';
